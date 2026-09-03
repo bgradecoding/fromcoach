@@ -9,3 +9,4 @@
 - T2 완료 18:00 KST: angles/view/repCounter/rules/gestures/ExerciseTracker + 단위테스트 21개 통과. 변경점: (1) knee_valgus를 부호 기반(무릎이 발목보다 중앙선 쪽 0.03+)으로 정의 — 정면 fixture에서 2D 각도가 유지되도록 굽힘 방향 반전 방식 채택. (2) arms_crossed는 손목 좌우 순서가 어깨 순서와 반전됐는지로 판정(거울/비거울 좌표 모두 안전).
 - T3 완료 18:10 KST: machine(순수 리듀서)+store(타이머/엔진/TTS/localStorage)+adapter/tools/phaseTools/log/PlanForm. 단위테스트 40개 통과. 브라우저 브리지로 5.7 DoD 전부 검증(idle 툴 4개, 단계 전환, applied/rejected/timeout, endSession 요약). 수정: 숨김 탭 타이머 스로틀 대응으로 replay를 경과시간 캐치업 방식으로 변경.
 - T4 완료 18:20 KST: UI 전체 조립(SessionCard/PlanCard/PlanForm/AgentLog/ProposalOverlay/DebugPanel/CameraView 큐·각도라벨·카운트다운) + styles.css 디자인 시스템. 브라우저 시각 검증: idle/countdown/set(밸거스 칩)/오버레이/요약/디버그패널 전부 확인. 폼 클릭 제출 → createdBy=user 확인.
+- T5 완료 18:30 KST: Playwright E2E 통과 — idle 툴 확인 → 폼 제출(createdBy=user) → startSet/단계 툴 전환 → 10렙 리플레이로 세트 완료 → applied/rejected/timeout → endSession 요약 + Agent log DOM 확인. 이슈 없음.
