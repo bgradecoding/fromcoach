@@ -1,6 +1,6 @@
 # FormCoach
 
-**Work out in front of your webcam. The page measures your reps and form — entirely inside the browser tab — and hands the numbers to any browser agent as WebMCP tools. The agent becomes your coach without ever seeing a frame of video.**
+**Work out in front of your webcam. The page measures reps and form inside the browser tab and exposes structured measurements and workout controls to a WebMCP-capable browser agent. These tools return data, not camera images.**
 
 - **Live app:** _added on deploy_ (Vercel)
 - **Demo video:** _added on submission_
@@ -10,22 +10,23 @@
 
 ## Why WebMCP
 
-The camera stream exists only in this tab. A server-side MCP tool with the same job would need the video uploaded somewhere. With WebMCP, MediaPipe Pose runs on-device, and the agent gets a live numeric contract instead: joint angles, rep counts, tempo, and form flags. The agent knows *how you're moving* — it never sees *you*.
+WebMCP connects the agent directly to the workout running in the user's tab. MediaPipe runs locally, and the page publishes joint angles, rep counts, tempo, form flags, and phase-specific controls. The agent can read current state and propose an action without scraping the interface or receiving camera images through these tools.
 
-The interaction design follows from the same constraint: mid-set your hands are busy and sweaty, so the agent's write actions are confirmed with **body gestures** (raise both hands to accept, cross your arms to decline) detected by the same pose model.
+Mid-workout your hands are busy, so proposed program changes can be confirmed with **body gestures**: raise both hands to accept or cross your arms to decline. During rest, a separate hand detector lets you resume with an open palm, even when your body is outside the frame.
 
 ## What the agent can do
 
-Seven imperative tools plus one declarative form. Read tools are annotated `readOnlyHint` so agents can poll freely; write tools gate on the human.
+Eight imperative tools plus a declarative form where the browser supports it. Read tools have `readOnlyHint`; program adjustments require an explicit gesture or button response. Starting, ending, creating a plan, and setting rest do not use that extra confirmation overlay.
 
 | Tool | What it does | Read-only |
 |---|---|---|
 | `getWorkoutPlan` | Today's plan: blocks, creator (user/agent), injury note | ✓ |
 | `getLiveMetrics` | Live phase, reps, joint angle, view, form flags, rest timer, palm detection and hold progress | ✓ |
 | `getSetHistory` | Completed sets: reps vs target, flag counts, avg tempo | ✓ |
+| `createWorkoutPlan` | Creates a validated squat/pushup plan in idle/done; credits the agent | |
 | `startSet` | Starts the next set after a 3s countdown | |
 | `setRest` | Sets rest duration (10–600s), live timer included | |
-| `adjustProgram` | Proposes swap_exercise / reduce_reps / add_set / extend_rest — resolves only after the user's gesture (or 20s timeout) | |
+| `adjustProgram` | Proposes swap_exercise / reduce_reps / add_set / extend_rest; returns applied, rejected, timeout, or cancelled if the session ends | |
 | `endSession` | Ends the session, returns summary + recommendations | |
 | `createPlan` (declarative `<form toolname>`) | Creates the plan; the handler reads `SubmitEvent.agentInvoked` to credit the agent | |
 
@@ -33,12 +34,12 @@ Seven imperative tools plus one declarative form. Read tools are annotated `read
 
 | Phase | Active tools (besides the three read tools) |
 |---|---|
-| idle | startSet, createPlan form |
+| idle | createWorkoutPlan, startSet, createPlan form |
 | countdown | endSession |
 | set | adjustProgram, setRest, endSession |
 | rest | startSet, setRest, adjustProgram, endSession |
 | awaiting confirmation | endSession |
-| done | createPlan form |
+| done | createWorkoutPlan, createPlan form |
 
 ## Try it
 
@@ -46,25 +47,26 @@ Seven imperative tools plus one declarative form. Read tools are annotated `read
 
 **Path B — Chrome:** enable `chrome://flags/#enable-webmcp-testing` (or `#enable-experimental-web-platform-features`), install a Model Context Tool Inspector extension, and open the live URL.
 
-Prompt script (the demo video follows the same order):
+Short demo prompts (full shot list and narration: [Demo video script](docs/DEMO_VIDEO_SCRIPT.md)):
 
-1. "Create a 3x12 squat plan with 90 seconds rest. Note that my left knee is sensitive."
+1. "Create a squat plan with 2 sets, 3 reps per set, and 60 seconds rest. Note: Short demonstration."
 2. "Start the first set."
-3. *(do a few squats, let some knees cave in)* "How's my form so far?"
-4. "If my knees keep caving in, switch me to something safer."
-5. *(raise both hands to accept)* "What changed?"
-6. "Cut the rest to 45 seconds."
-7. "End the session and give me a summary."
+3. *(complete the first set)* "Read my metrics and set history. Summarize only the recorded measurements."
+4. "For a shorter demo, reduce the target to 2 reps from the next set. Ask for confirmation."
+5. *(raise both hands to accept, then hold an open palm for one second during rest)*
+6. *(complete the next set)* "Summarize my completed sets and recorded form flags."
 
-No camera? Append `?debug=1` to the URL for the debug panel and replay recorded pose fixtures instead.
+For an early finish, ask "End the session and summarize it" while a session is active. At `done`, the summary already exists and `endSession` is no longer exposed. The agent should use the read tools.
+
+No camera? Append `?debug=1&replay=none` for the debug panel and replay **synthetic landmark fixtures**. Label footage of this mode as replay data.
 
 ## The human–agent experience
 
-- **Gesture confirmation:** `adjustProgram` returns a pending promise until you raise both hands (accept), cross your arms (decline), or 20s pass. On-screen buttons exist as a fallback.
+- **Gesture confirmation:** `adjustProgram` waits for hands-up acceptance, arms-crossed rejection, a button response, or a 20s timeout. Ending the session cancels the pending call without applying the proposal. A lower rep target applies from the next set.
 - **Skip rest with a palm:** while resting, show an open palm to the camera and hold it for 1 second. Only your hand needs to be visible. The camera switches to MediaPipe Gesture Recognizer during rest and resumes body-pose tracking for the next set. A progress bar shows the hold; briefly showing a hand, making a fist, or losing tracking does not skip rest. The Skip rest button remains available while the hand model loads or if detection is unavailable.
 - **Agent log:** every tool call is rendered in the UI with source (browser agent vs debug bridge), status, and latency — you always see what the agent did.
-- **`agentInvoked` attribution:** a plan submitted by the agent through the declarative form gets a "Created by agent" badge.
-- **Voice:** the page speaks proposals and set completions via `speechSynthesis`.
+- **Agent attribution:** `createWorkoutPlan` and agent-submitted declarative forms get a "Created by agent" badge. The imperative tool works even when the browser does not expose the form tool.
+- **Voice:** the page speaks fixed proposal and completion messages via `speechSynthesis`. Agent reasoning comes from the external browser agent; this app has no embedded LLM, voice-command input, or autonomous coaching loop.
 
 ## How it works
 
@@ -81,7 +83,7 @@ webcam ──▶ MediaPipe Pose (in-tab, on-device)
    WebMCP tools (document.modelContext) ◀──▶ browser agent
 ```
 
-Privacy: no backend, no accounts, no uploads. Video frames never leave the `<video>` element; tools return JSON numbers and strings. The plan is kept in `localStorage`, set history in memory.
+Privacy: the app processes camera frames locally with MediaPipe and does not implement camera uploads. WebMCP responses contain structured data without images. Models and runtime assets are downloaded when needed. The plan is kept in `localStorage`, set history in memory. This describes the app's data flow, not other permissions or capabilities of the surrounding browser agent.
 
 During rest, `getLiveMetrics` reports `trackingMode: "palm"`, `handTracking` (`loading`, `ready`, or `unavailable`), `handDetected`, `palmDetected`, and `palmHoldProgress` (0–1). Body fields report `personDetected: false`, `view: "unknown"`, and `currentAngle: null` because rest does not require a full-body view. Outside rest, `trackingMode` returns to `pose` and `handTracking` is `inactive`. Program-change confirmation continues to use the existing body gestures.
 

@@ -55,7 +55,7 @@ let restTimer: ReturnType<typeof setInterval> | null = null;
 let confirmTimer: ReturnType<typeof setTimeout> | null = null;
 
 interface ProposalResult {
-  status: ProposalOutcome | "error";
+  status: ProposalOutcome | "cancelled" | "error";
   proposalId?: string;
   plan?: Plan;
   reason?: string;
@@ -74,7 +74,7 @@ function describeProposal(p: Proposal): string {
     case "swap_exercise":
       return `switch to ${String(p.exercise).replace(/_/g, " ")} from the next set`;
     case "reduce_reps":
-      return `reduce the target to ${p.reps} reps`;
+      return `reduce the target to ${p.reps} reps from the next set`;
     case "add_set":
       return "add one more set";
     case "extend_rest":
@@ -117,6 +117,13 @@ function onPhaseEntered(prev: SessionState) {
       }
       break;
     case "done":
+      if (pendingProposal) {
+        const { proposalId, resolve } = pendingProposal;
+        pendingProposal = null;
+        // END_SESSION already cleared the overlay. Settle the tool call without
+        // RESOLVE_PROPOSAL, which would otherwise resume exercise or rest first.
+        resolve({ status: "cancelled", reason: "session ended", proposalId });
+      }
       engine.setRepCounting(false);
       engine.setGestureMode("off");
       if (prev.phase !== "idle") speak("Session complete. Nice work.");

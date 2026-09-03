@@ -2,7 +2,7 @@ import { useState } from "react";
 import { store } from "../session/store";
 
 // Declarative WebMCP tool: the form element itself is the tool. Browsers
-// expose it as "createPlan"; the submit handler reads SubmitEvent.agentInvoked
+// with declarative support expose it as "createPlan"; the submit handler reads SubmitEvent.agentInvoked
 // to attribute the plan to the agent or the human.
 export default function PlanForm() {
   const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,8 @@ export default function PlanForm() {
     const sets = Number(fd.get("sets"));
     const reps = Number(fd.get("reps"));
     const restSec = Number(fd.get("restSec"));
-    const userNote = String(fd.get("userNote") ?? "").trim();
+    const rawNote = String(fd.get("userNote") ?? "");
+    const userNote = rawNote.trim();
 
     if (!["squat", "pushup"].includes(exercise)) return setError("Pick squat or pushup.");
     if (!Number.isInteger(sets) || sets < 1 || sets > 10) return setError("Sets must be 1-10.");
@@ -22,6 +23,7 @@ export default function PlanForm() {
     if (!Number.isInteger(restSec) || restSec < 10 || restSec > 600) {
       return setError("Rest must be 10-600 seconds.");
     }
+    if (rawNote.length > 500) return setError("Note must be 500 characters or fewer.");
     setError(null);
 
     const agentInvoked = Boolean(
@@ -91,6 +93,7 @@ export default function PlanForm() {
         Note
         <input
           name="userNote"
+          maxLength={500}
           placeholder="e.g. left knee is sensitive"
           toolparamdescription="Anything the coach should know: injuries, sensitivities, limits."
         />

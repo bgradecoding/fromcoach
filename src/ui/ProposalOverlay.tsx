@@ -6,7 +6,7 @@ function describe(p: Proposal): string {
     case "swap_exercise":
       return `Switch to ${String(p.exercise).replace(/_/g, " ")} from the next set`;
     case "reduce_reps":
-      return `Reduce the target to ${p.reps} reps`;
+      return `Reduce the target to ${p.reps} reps from the next set`;
     case "add_set":
       return "Add one more set";
     case "extend_rest":

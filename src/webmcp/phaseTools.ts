@@ -10,12 +10,12 @@ import { TOOLS } from "./tools";
 const READ_TOOLS = ["getWorkoutPlan", "getLiveMetrics", "getSetHistory"];
 
 export const PHASE_TOOLS: Record<Phase, string[]> = {
-  idle: ["startSet"],
+  idle: ["createWorkoutPlan", "startSet"],
   countdown: ["endSession"],
   set: ["adjustProgram", "setRest", "endSession"],
   rest: ["startSet", "setRest", "adjustProgram", "endSession"],
   awaiting_confirmation: ["endSession"],
-  done: [],
+  done: ["createWorkoutPlan"],
 };
 
 let controller: AbortController | null = null;

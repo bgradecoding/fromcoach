@@ -1,4 +1,4 @@
-// The seven imperative WebMCP tools. Descriptions tell the agent when to
+// The imperative WebMCP tools. Descriptions tell the agent when to
 // call each tool, not just what it does. Executes never throw: they return
 // { status: "error", reason } instead.
 import { EXERCISE_NAMES } from "../pose/engine";
@@ -18,13 +18,53 @@ function asRecord(input: unknown): Record<string, unknown> {
 }
 
 function intInRange(v: unknown, min: number, max: number): number | null {
-  const n = typeof v === "string" ? Number(v) : v;
-  if (typeof n !== "number" || !Number.isFinite(n)) return null;
-  const i = Math.round(n);
-  return i >= min && i <= max ? i : null;
+  return typeof v === "number" && Number.isInteger(v) && v >= min && v <= max ? v : null;
 }
 
 export const TOOLS: Record<string, ToolDef> = {
+  createWorkoutPlan: {
+    name: "createWorkoutPlan",
+    title: "Create a workout plan",
+    description:
+      "Creates a workout plan with one exercise, sets, reps, rest seconds, and an optional note about injuries or limits. Available before a session starts or after it ends. Replaces the previous plan and starts a fresh idle session. Call when the user asks you to create their workout plan.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        exercise: { type: "string", enum: ["squat", "pushup"], description: "Exercise to train." },
+        sets: { type: "integer", minimum: 1, maximum: 10, description: "Number of sets." },
+        reps: { type: "integer", minimum: 1, maximum: 50, description: "Target reps per set." },
+        restSec: { type: "integer", minimum: 10, maximum: 600, description: "Rest between sets in seconds." },
+        userNote: { type: "string", maxLength: 500, description: "Optional injuries, sensitivities, or limits the coach should know." },
+      },
+      required: ["exercise", "sets", "reps", "restSec"],
+    },
+    execute: async (input) => {
+      const phase = store.get().phase;
+      if (phase !== "idle" && phase !== "done") {
+        return err(`createWorkoutPlan is only available before or after a session (current phase: ${phase})`);
+      }
+      const rec = asRecord(input);
+      if (rec.exercise !== "squat" && rec.exercise !== "pushup") {
+        return err("exercise must be squat or pushup");
+      }
+      const sets = intInRange(rec.sets, 1, 10);
+      if (sets === null) return err("sets must be an integer between 1 and 10");
+      const reps = intInRange(rec.reps, 1, 50);
+      if (reps === null) return err("reps must be an integer between 1 and 50");
+      const restSec = intInRange(rec.restSec, 10, 600);
+      if (restSec === null) return err("restSec must be an integer between 10 and 600");
+      if (rec.userNote !== undefined && (typeof rec.userNote !== "string" || rec.userNote.length > 500)) {
+        return err("userNote must be a string of at most 500 characters");
+      }
+      const plan = store.createPlan({
+        blocks: [{ exercise: rec.exercise, sets, reps, restSec }],
+        createdBy: "agent",
+        userNote: typeof rec.userNote === "string" ? rec.userNote.trim() : "",
+      });
+      return { status: "created", plan };
+    },
+  },
+
   getWorkoutPlan: {
     name: "getWorkoutPlan",
     title: "Get workout plan",
@@ -34,7 +74,7 @@ export const TOOLS: Record<string, ToolDef> = {
     annotations: { readOnlyHint: true },
     execute: async () => {
       const plan = store.get().plan;
-      return plan ?? { status: "error", reason: "no plan yet — create one with the createPlan form" };
+      return plan ?? { status: "error", reason: "no plan yet — use createWorkoutPlan or the createPlan form" };
     },
   },
 
@@ -106,7 +146,7 @@ export const TOOLS: Record<string, ToolDef> = {
     name: "adjustProgram",
     title: "Propose a program change",
     description:
-      "Proposes a program change: swap_exercise (from the next set), reduce_reps, add_set, or extend_rest. The user must confirm with a body gesture (raising both hands to accept, crossing arms to decline); the call resolves only after they respond or 20 seconds pass. If status is 'rejected' or 'timeout', do not retry the same proposal. Always include a short reason the user will see.",
+      "Proposes a program change: swap_exercise or reduce_reps from the next set, add_set, or extend_rest. reduce_reps must lower the current plan block's target; it does not change the set already in progress. The user confirms with a body gesture (raising both hands to accept, crossing arms to decline) or the on-screen buttons. The call resolves after their response, a 20-second timeout, or cancellation when the session ends. If status is 'rejected', 'timeout', or 'cancelled', do not retry the same proposal. Always include a short reason the user will see.",
     inputSchema: {
       type: "object",
       properties: {
@@ -120,7 +160,7 @@ export const TOOLS: Record<string, ToolDef> = {
           enum: EXERCISE_NAMES,
           description: "Required for swap_exercise: the exercise to switch to from the next set.",
         },
-        reps: { type: "integer", minimum: 1, maximum: 50, description: "Required for reduce_reps: the new target." },
+        reps: { type: "integer", minimum: 1, maximum: 50, description: "Required for reduce_reps: a target below the current plan block's reps, applied from the next set." },
         seconds: { type: "integer", minimum: 1, maximum: 600, description: "Required for extend_rest: seconds to add." },
         reason: { type: "string", description: "Why you are proposing this. Shown to the user on the confirmation card." },
       },
@@ -149,6 +189,10 @@ export const TOOLS: Record<string, ToolDef> = {
       if (action === "reduce_reps") {
         const reps = intInRange(rec.reps, 1, 50);
         if (reps === null) return err("reps (1-50) is required for reduce_reps");
+        const state = store.get();
+        const block = state.plan?.blocks[state.blockIndex];
+        if (!block) return err("no plan block is available to reduce reps");
+        if (reps >= block.reps) return err("reps must be lower than the current plan block's target");
         proposal.reps = reps;
       }
       if (action === "extend_rest") {

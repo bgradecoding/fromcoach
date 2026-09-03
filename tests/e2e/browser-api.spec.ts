@@ -36,7 +36,7 @@ test("browser API path via mocked document.modelContext", async ({ page }) => {
     internal: (window as any).__formcoach.listTools().map((t: any) => t.name).sort(),
   }));
   expect(both.mock).toEqual(both.internal);
-  expect(both.mock).toEqual(["getLiveMetrics", "getSetHistory", "getWorkoutPlan", "startSet"]);
+  expect(both.mock).toEqual(["createWorkoutPlan", "getLiveMetrics", "getSetHistory", "getWorkoutPlan", "startSet"]);
 
   // annotations reach the browser API
   const annotations = await page.evaluate(() => (window as any).__mockMC.annotations("getLiveMetrics"));
@@ -48,16 +48,45 @@ test("browser API path via mocked document.modelContext", async ({ page }) => {
   const metrics = JSON.parse(metricsResult.content[0].text);
   expect(metrics.phase).toBe("idle");
 
+  // Plan creation works through the registered API without declarative form support.
+  const createdResult = await page.evaluate(() => (window as any).__mockMC.call("createWorkoutPlan", {
+    exercise: "squat", sets: 3, reps: 10, restSec: 90, userNote: "left knee is sensitive",
+  }));
+  const created = JSON.parse(createdResult.content[0].text);
+  expect(created).toMatchObject({
+    status: "created",
+    plan: {
+      createdBy: "agent",
+      userNote: "left knee is sensitive",
+      blocks: [{ exercise: "squat", sets: 3, reps: 10, restSec: 90 }],
+    },
+  });
+  const planResult = await page.evaluate(() => (window as any).__mockMC.call("getWorkoutPlan", {}));
+  expect(JSON.parse(planResult.content[0].text)).toEqual(created.plan);
+  await expect(page.locator(".agent-badge")).toHaveText("Created by agent");
+
   // a write tool through the browser API drives the session, and the
   // AbortSignal-based unregistration swaps the tool set on phase change
   const startResult = await page.evaluate(() => (window as any).__mockMC.call("startSet", {}));
-  expect(JSON.parse(startResult.content[0].text)).toMatchObject({ status: "started" });
+  expect(JSON.parse(startResult.content[0].text)).toMatchObject({ status: "started", targetReps: 10 });
   await page.waitForFunction(() => (window as any).__formcoach.phase() === "set", undefined, {
     timeout: 6000,
   });
   const setViewOfMock = await page.evaluate(() => (window as any).__mockMC.list());
   expect(setViewOfMock).toContain("adjustProgram");
   expect(setViewOfMock).not.toContain("startSet");
+  expect(setViewOfMock).not.toContain("createWorkoutPlan");
+
+  // Ending the session makes native plan creation available for a fresh session.
+  await page.evaluate(() => (window as any).__mockMC.call("endSession", {}));
+  expect(await page.evaluate(() => (window as any).__mockMC.list()))
+    .toEqual(["createWorkoutPlan", "getLiveMetrics", "getSetHistory", "getWorkoutPlan"]);
+  const nextPlanResult = await page.evaluate(() => (window as any).__mockMC.call("createWorkoutPlan", {
+    exercise: "pushup", sets: 2, reps: 8, restSec: 60,
+  }));
+  expect(JSON.parse(nextPlanResult.content[0].text)).toMatchObject({ status: "created", plan: { createdBy: "agent" } });
+  const nextMetricsResult = await page.evaluate(() => (window as any).__mockMC.call("getLiveMetrics", {}));
+  expect(JSON.parse(nextMetricsResult.content[0].text).phase).toBe("idle");
 
   // the call shows up in the agent log attributed to the browser agent
   await expect(page.locator(".agent-log")).toContainText("agent");

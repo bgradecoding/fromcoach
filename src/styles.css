@@ -676,6 +676,7 @@ body {
 }
 
 .log-status-ok,
+.log-status-created,
 .log-status-applied,
 .log-status-started {
   color: var(--accent);
@@ -693,7 +694,8 @@ body {
   background: var(--warn-soft);
 }
 
-.log-status-timeout {
+.log-status-timeout,
+.log-status-cancelled {
   color: var(--text-dim);
   background: var(--bg-raise-2);
 }

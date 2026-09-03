@@ -7,19 +7,19 @@ const READ = ["getLiveMetrics", "getSetHistory", "getWorkoutPlan"];
 const names = () => listToolDefs().map((t) => t.name).sort();
 
 describe("phase-based tool registration (PLAN §5.3)", () => {
-  it("registers read tools plus startSet in idle", () => {
+  it("registers read tools plus plan creation and startSet in idle", () => {
     initPhaseTools(); // store starts in idle
-    expect(names()).toEqual([...READ, "startSet"].sort());
+    expect(names()).toEqual([...READ, "createWorkoutPlan", "startSet"].sort());
   });
 
   it("matches the table for every phase", () => {
     const expected: Record<Phase, string[]> = {
-      idle: ["startSet"],
+      idle: ["createWorkoutPlan", "startSet"],
       countdown: ["endSession"],
       set: ["adjustProgram", "setRest", "endSession"],
       rest: ["startSet", "setRest", "adjustProgram", "endSession"],
       awaiting_confirmation: ["endSession"],
-      done: [],
+      done: ["createWorkoutPlan"],
     };
     for (const phase of Object.keys(expected) as Phase[]) {
       syncToolsToPhase(phase);

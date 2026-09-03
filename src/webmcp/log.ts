@@ -6,9 +6,11 @@ export type LogStatus =
   | "ok"
   | "error"
   | "pending"
+  | "created"
   | "started"
   | "applied"
   | "rejected"
+  | "cancelled"
   | "timeout";
 
 export type LogSource = "browser-api" | "debug-bridge" | "system" | "ui";

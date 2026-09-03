@@ -9,11 +9,11 @@ test("full session via debug bridge (PLAN §7.1)", async ({ page }) => {
   await page.reload();
   await page.waitForFunction(() => !!(window as any).__formcoach);
 
-  // 1. idle exposes exactly the read tools + startSet
+  // 1. idle exposes exactly the read tools + plan creation + startSet
   const idleTools = await page.evaluate(() =>
     (window as any).__formcoach.listTools().map((t: any) => t.name).sort(),
   );
-  expect(idleTools).toEqual(["getLiveMetrics", "getSetHistory", "getWorkoutPlan", "startSet"]);
+  expect(idleTools).toEqual(["createWorkoutPlan", "getLiveMetrics", "getSetHistory", "getWorkoutPlan", "startSet"]);
 
   // 2. the declarative form creates a plan attributed to the human
   await page.fill('input[name="reps"]', "10");
@@ -37,6 +37,7 @@ test("full session via debug bridge (PLAN §7.1)", async ({ page }) => {
   expect(setTools).toContain("setRest");
   expect(setTools).toContain("endSession");
   expect(setTools).not.toContain("startSet");
+  expect(setTools).not.toContain("createWorkoutPlan");
 
   // replaying 10 squat reps completes the 10-rep set → rest
   await page.evaluate(() => (window as any).__formcoach.replay("squat_10reps_side", 8));
@@ -83,11 +84,45 @@ test("full session via debug bridge (PLAN §7.1)", async ({ page }) => {
   expect(summary.sets).toBe(1);
   await expect(page.locator(".agent-log")).toContainText("endSession");
 
-  // done: only read tools remain; unavailable tools error instead of throwing
+  // done: read tools and plan creation remain; unavailable tools error instead of throwing
   const doneTools = await page.evaluate(() =>
     (window as any).__formcoach.listTools().map((t: any) => t.name).sort(),
   );
-  expect(doneTools).toEqual(["getLiveMetrics", "getSetHistory", "getWorkoutPlan"]);
+  expect(doneTools).toEqual(["createWorkoutPlan", "getLiveMetrics", "getSetHistory", "getWorkoutPlan"]);
   const unavailable = await page.evaluate(() => (window as any).__formcoach.callTool("startSet"));
   expect(unavailable).toMatchObject({ status: "error" });
+});
+
+test("demo sequence: agent plan, gesture approval, palm rest skip, final results", async ({ page }) => {
+  await page.goto("/?debug=1&replay=none");
+  await page.waitForFunction(() => !!(window as any).__formcoach);
+  // Synthetic frames verify the filmed sequence's state transitions, not camera recognition.
+  await page.evaluate(() => (window as any).__formcoach.callTool("createWorkoutPlan", {
+    exercise: "squat", sets: 2, reps: 3, restSec: 60, userNote: "Short demonstration",
+  }));
+  await expect(page.locator(".agent-badge")).toHaveText("Created by agent");
+  await page.evaluate(() => (window as any).__formcoach.callTool("startSet"));
+  await page.waitForFunction(() => (window as any).__formcoach.phase() === "set");
+  await page.evaluate(() => (window as any).__formcoach.replay("squat_10reps_side", 4));
+  expect(await page.evaluate(() => (window as any).__formcoach.callTool("getLiveMetrics")))
+    .toMatchObject({ phase: "rest", trackingMode: "palm", personDetected: false });
+
+  const proposal = page.evaluate(() => (window as any).__formcoach.callTool("adjustProgram", {
+    action: "reduce_reps", reps: 2, reason: "Shorter demo requested by the user",
+  }));
+  await expect(page.locator(".proposal-title")).toHaveText("Reduce the target to 2 reps from the next set");
+  await page.evaluate(() => (window as any).__formcoach.replay("gesture_hands_up", 1));
+  expect(await proposal).toMatchObject({ status: "applied" });
+  await expect(page.locator(".proposal-backdrop")).toHaveCount(0);
+
+  await page.evaluate(() => (window as any).__formcoach.replay("gesture_open_palm", 1));
+  expect(await page.evaluate(() => (window as any).__formcoach.phase())).toBe("countdown");
+  await page.waitForFunction(() => (window as any).__formcoach.phase() === "set");
+  expect(await page.evaluate(() => (window as any).__formcoach.callTool("getLiveMetrics")))
+    .toMatchObject({ targetReps: 2, trackingMode: "pose" });
+  await page.evaluate(() => (window as any).__formcoach.replay("squat_10reps_side", 4));
+  expect(await page.evaluate(() => (window as any).__formcoach.phase())).toBe("done");
+  const history = await page.evaluate(() => (window as any).__formcoach.callTool("getSetHistory"));
+  expect(history).toMatchObject([{ reps: 3, target: 3 }, { reps: 2, target: 2 }]);
+  expect(history.reduce((total: number, set: any) => total + set.reps, 0)).toBe(5);
 });

@@ -13,3 +13,12 @@
 - T6 완료 18:40 KST: README(Why WebMCP/툴 표/Try it/디버그 브리지/Roadmap), docs/DEVPOST.md(제출 텍스트+체크리스트), docs/screenshots 3장 자동 생성(scripts/screenshots.ts). 라이브 URL·영상 링크는 배포 후 사람이 README 상단에 기입.
 - 추가 18:50 KST: browser-api.spec.ts — mock document.modelContext로 실 API 경로 검증(등록 미러링, {content:[...]} 래핑, readOnlyHint 전달, AbortSignal 해제, Agent log 'agent' 표기). E2E 2개 통과.
 - 최종 상태: 단위 40 + E2E 2 전부 green, build/lint 클린. 남은 **사람 작업**: (1) GitHub 공개 레포 push + Vercel import → README 상단 라이브 URL 기입 (2) 실기기 검증 라운드(7.2) (3) 영상 촬영·업로드 (4) v1.0 태그 (5) Devpost 제출(docs/DEVPOST.md 붙여넣기, docs/screenshots 3장).
+
+## 2026-09-04 — WebMCP fixes and filming script
+
+- Added imperative `createWorkoutPlan` in idle/done so agent plan creation does not depend on declarative form exposure. Inputs are validated before mutation and plans carry agent attribution.
+- Ending a session now settles a pending program proposal once with `cancelled / session ended`, preserving the plan and clearing the old timer. Added cancellation/creation log styles.
+- Numeric tool arguments reject strings and fractions; `reduce_reps` must lower the block target. Tool descriptions, overlay text, and speech clarify that the change begins with the next set. Plan notes are limited to 500 characters in both creation paths.
+- Added `docs/DEMO_VIDEO_SCRIPT.md`: a 2:45 English narration, shot timeline, exact agent prompts/tool arguments, camera framing, and clearly labelled synthetic-replay rehearsal. Updated README and Devpost text to reflect implemented behavior and official submission requirements.
+- Validation: 107 unit tests and 3 Playwright E2E tests passed; production build, lint, and whitespace checks passed. The E2E suite covers a mocked browser API, the existing session flow, and the exact demo sequence ending with two sets/five reps. Installed the matching Playwright Chromium runtime after the first E2E attempt found it missing. These automated checks do not establish live camera accuracy or a new in-app native WebMCP validation.
+- Recording, public deployment URL, YouTube upload, and Devpost submission remain release steps. No application dependencies were added.
