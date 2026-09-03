@@ -1,123 +1,217 @@
-# FormCoach — demo video script
+# FormCoach 촬영 대본
 
-**Target edit: 2 minutes 45 seconds. Language: English narration and captions.**
+**목표 영상 길이: 2분 45초. 아래 내레이션을 한글로 읽으며 촬영하면 됩니다.**
 
-The story: a browser agent creates a workout, reads locally measured results, proposes a change that the person approves with a gesture, and summarizes the session. An open palm resumes the workout during rest without needing a full-body view.
+전체 흐름은 **운동 계획 생성 → 첫 세트 측정 → AI의 변경 제안 → 양손으로 승인 → 손바닥으로 휴식 건너뛰기 → 결과 요약**입니다.
 
-This script uses implemented features. Record the real app and actual browser-agent tool calls. The narration is voice-over; FormCoach itself speaks fixed proposal and completion messages, not this script or LLM-generated coaching.
+‘화면·조작’은 촬영자가 따라 할 행동이고, **‘읽을 말’만 실제로 읽으면 됩니다.** LLM에 입력할 명령은 뒤에 따로 모았습니다. 내레이션은 직접 녹음하는 설명입니다. 앱에서 나오는 음성은 제안과 세트 완료를 알리는 고정 안내입니다.
 
-## Before recording
+출품용 영상에는 한글 내레이션에 **영어 자막**을 붙여 영어 번역을 제공하세요.
 
-1. Run `npm run dev` for rehearsal, or open the deployed build for the final take. Use a browser with working WebMCP and an external agent that can call the page's tools. Keep the app and agent conversation visible together.
-2. Start from `idle` or `done`. Refresh if needed; this resets the in-memory session. A saved plan may remain, but the first prompt replaces it. Do not use replay URL parameters for the live-camera take.
-3. Allow the camera and let the models load. Frame the whole body from the side for squat counting. For approval, face the camera with your head, shoulders, wrists, and hips visible; hold both wrists above your nose for about one second. Then rehearse showing only an open palm during rest. Wait for hand tracking to be ready before the palm shot.
-4. Check that `createWorkoutPlan` is available in the browser's site tools. Invoke it through the agent and check that the Agent log source is **agent**, not **bridge**. A WebMCP detection badge alone is not enough to establish this.
-5. Record at 1920×1080 or higher, with readable text. Keep the camera view, phase/rep counter, and Agent log in the crop. Record clean voice-over separately; lower app speech while the narrator is speaking.
-6. Record the full interaction first, then cut pauses to the timeline below. Keep the proposal → gesture → applied result and palm hold → countdown transitions continuous so the cause is visible. Do not speed up those gesture shots.
+## 촬영 전 준비
 
-## Shot list and spoken script
+1. 연습할 때는 `npm run dev`를 실행하고 [로컬 앱](http://localhost:5173/)을 엽니다. 최종 촬영은 가능하면 배포된 주소에서 진행합니다. WebMCP가 작동하는 브라우저에서 **앱 화면과 LLM 대화창을 함께** 보여 주세요.
+2. 앱을 대기 상태(`idle`) 또는 완료 상태(`done`)로 준비합니다. 필요하면 새로고침합니다. 저장된 계획이 남아 있어도 첫 번째 명령으로 새 계획을 만들 수 있습니다. 실제 카메라 촬영에서는 주소에 재생용 매개변수를 붙이지 않습니다.
+3. 카메라를 허용하고 모델이 로딩될 때까지 기다립니다. 스쿼트는 **전신이 옆모습으로** 보이게 잡습니다. 제안 승인 때는 카메라 정면을 보고 **머리·어깨·양 손목·양쪽 엉덩이가 모두** 보이게 합니다. 양 손목을 코보다 높게 약 1초 유지하는 동작을 미리 연습합니다.
+4. 휴식 중에는 손 인식이 준비된 것을 확인한 뒤 손바닥을 보여 주세요. 이 장면에서는 몸 전체가 화면에 들어올 필요가 없습니다.
+5. 브라우저의 사이트 도구 목록에 `createWorkoutPlan`이 있는지 확인합니다. LLM으로 호출한 뒤 앱의 **Agent log**에 호출 출처가 **agent**로 표시되는지 확인합니다. **bridge**는 디버그 경로이므로 실제 브라우저 에이전트 호출 장면과 구분합니다.
+6. 1920×1080 이상으로 녹화하고 글자가 읽히는 크기로 화면을 배치합니다. 카메라 화면, 현재 단계와 횟수, Agent log가 보이도록 합니다. 설명 음성은 따로 녹음해 얹어도 됩니다. 내레이션과 앱 안내 음성이 겹치면 앱 소리를 줄입니다.
+7. 실제 동작을 끝까지 녹화한 뒤 대기 시간을 편집합니다. **제안 → 양손 승인 → 적용**, **손바닥 유지 → 카운트다운** 장면은 동작과 결과가 연결되어 보이도록 연속으로 남깁니다. 이 두 장면은 배속하지 않습니다.
 
-Times are positions in the final edit, not deadlines for typing or waiting for the agent. Send each prompt only after the previous step's expected state is visible.
+## 장면별 촬영 순서와 읽을 말
 
-| Time | Screen and action | English narration | On-screen caption |
-|---|---|---|---|
-| 00:00–00:12 | Show the live camera and workout interface. Briefly show the person stepping into position. | “When you're working out, reaching for a keyboard breaks your rhythm. FormCoach connects an AI browser agent to your workout, while you stay in control through gestures.” | **FormCoach · Your workout, connected to an agent** |
-| 00:12–00:32 | Send prompt 1 below. Show `createWorkoutPlan`, its `created` result, the 2×3 plan, and the **Created by agent** badge. | “I ask for a short squat session. Through WebMCP, the agent creates a structured plan directly in this tab. The plan and agent activity are visible on the page.” | **Natural language → WebMCP → workout plan** |
-| 00:32–00:57 | Send prompt 2. Show the three-second countdown and three controlled squats. Capture actual counter changes and the transition to `rest`. | “The browser processes the camera locally with MediaPipe. It counts repetitions and measures movement. WebMCP exposes those measurements as structured data, so the agent can read the workout state.” | **Camera processing in the browser · Structured tool results** |
-| 00:57–01:15 | While resting, send prompt 3. Show `getLiveMetrics`, `getSetHistory`, and the agent's short answer. Crop into actual returned fields; do not insert invented metrics. | “Now the agent reads the completed set and current session. It can summarize recorded reps and form flags, using the same state that drives the interface.” | **Read the live session and completed sets** |
-| 01:15–01:44 | Send prompt 4. When the overlay appears, immediately face the camera and raise both hands until accepted. Show `pending` becoming `applied`, then the updated plan. | “For a shorter demo, I ask to reduce the next set to two reps. The agent proposes the change and waits. I raise both hands to accept. The new target applies from the next set. Crossing my arms would decline.” | **Agent proposes → Person approves → Plan updates** |
-| 01:44–02:02 | Once back in `rest`, bring only an open hand into view. Hold for one second. Show the progress indicator filling, then the next countdown. | “During rest, I only need my hand in frame. Holding an open palm for one second skips the remaining rest and starts the next countdown.” | **Hand-only rest control · Hold an open palm for 1 second** |
-| 02:02–02:21 | Return to the side view during the countdown. Complete the two-rep set. Show the target is now two and the session reaches `done`. | “Body tracking resumes for the next set, with the updated target. When the final set is complete, FormCoach brings up the session results.” | **Updated target · Completed session** |
-| 02:21–02:36 | Send prompt 5. Show the set records, summary, and actual agent answer. | “The agent summarizes the recorded sets. The activity log shows which tools it called and their outcomes, so I can follow what happened.” | **Measured results · Visible agent actions** |
-| 02:36–02:45 | Hold on the finished app and an end card with the real live URL and repository link. | “FormCoach connects local movement sensing, browser-agent reasoning, and physical consent through WebMCP. The agent helps; the person decides.” | **FormCoach · Built with WebMCP** |
+시간은 **최종 편집 영상 기준**입니다. LLM 응답을 시간표에 억지로 맞추지 말고, 각 단계가 완료된 것을 확인한 뒤 다음 명령을 보내세요.
 
-## Copy-and-paste agent prompts
+### 00:00–00:12 · 앱 소개
 
-Use these in the external browser-agent conversation attached to the FormCoach tab. They are typed instructions, not voice commands recognized by the app.
+**화면·조작:** 앱과 실시간 카메라 화면을 보여 줍니다. 운동할 사람이 카메라 앞에 서는 모습을 짧게 담습니다.
 
-### 1. Create the plan
+**읽을 말:**
+
+> 운동하다가 키보드를 만지면 흐름이 끊기죠. 폼코치는 AI가 운동을 돕고, 사용자는 손동작으로 결정하는 웹 앱입니다.
+
+**화면 자막:** AI와 함께하는 운동, FormCoach
+
+### 00:12–00:32 · LLM으로 운동 계획 만들기
+
+**화면·조작:** 아래의 **명령 1**을 입력합니다. `createWorkoutPlan` 호출과 `created` 결과, **3회씩 2세트·휴식 60초** 계획, **Created by agent** 표시를 보여 줍니다.
+
+**읽을 말:**
+
+> 먼저 짧은 스쿼트 계획을 요청합니다. AI가 WebMCP 도구를 호출하면 이 페이지에 계획이 바로 만들어집니다. 누가 만들었는지, 어떤 도구를 사용했는지도 확인할 수 있습니다.
+
+**화면 자막:** 자연어 요청 → WebMCP 호출 → 운동 계획 생성
+
+### 00:32–00:57 · 첫 세트 시작과 측정
+
+**화면·조작:** **명령 2**를 입력합니다. 3초 카운트다운이 끝나면 스쿼트 3회를 수행합니다. 횟수가 실제로 올라가고 휴식 상태(`rest`)로 바뀌는 모습을 담습니다.
+
+**읽을 말:**
+
+> 운동을 시작하면 브라우저 안에서 카메라 영상을 처리해 횟수와 움직임을 측정합니다. WebMCP는 영상 대신 측정 데이터를 전달하고, AI는 그 데이터로 현재 운동 상태를 확인합니다.
+
+**화면 자막:** 카메라는 브라우저에서 처리 · AI에는 측정 데이터 전달
+
+### 00:57–01:15 · 측정 결과 확인
+
+**화면·조작:** 휴식 중에 **명령 3**을 입력합니다. `getLiveMetrics`, `getSetHistory` 호출과 LLM의 짧은 답변을 보여 줍니다. 실제 반환된 횟수와 자세 관련 항목을 확대합니다.
+
+**읽을 말:**
+
+> 방금 끝난 세트의 기록을 확인해 보겠습니다. AI는 앱에 기록된 횟수와 자세 관련 신호를 읽고 요약합니다. 화면과 AI가 같은 운동 데이터를 보고 있는 겁니다.
+
+**화면 자막:** 현재 운동 상태와 완료한 세트 기록 확인
+
+### 01:15–01:44 · 다음 세트 변경 제안과 양손 승인
+
+**화면·조작:** **명령 4**를 입력합니다. 승인 창이 나타나면 바로 카메라 정면을 보고 양손을 올립니다. 머리부터 엉덩이까지 화면에 들어오게 하고, **양 손목을 코보다 높게 약 1초 유지**합니다. 호출 상태가 `pending`에서 `applied`로 바뀌고 계획이 수정되는 모습을 담습니다.
+
+**읽을 말:**
+
+> 시연을 짧게 하기 위해 다음 세트를 두 번으로 줄여 달라고 요청합니다. AI가 변경을 제안하면 제 승인을 기다립니다. 양손을 올리면 승인되고, 다음 세트부터 적용됩니다. 팔을 교차하면 거절할 수도 있습니다.
+
+**화면 자막:** AI가 제안 → 사용자가 승인 → 다음 세트에 적용
+
+### 01:44–02:02 · 손바닥으로 휴식 건너뛰기
+
+**화면·조작:** 승인 후 다시 휴식 상태(`rest`)가 된 것을 확인합니다. 카메라에 **편 손바닥만** 보이게 하고 1초 유지합니다. 진행 표시가 차오른 뒤 다음 세트의 카운트다운으로 바뀌는 장면을 보여 줍니다.
+
+**읽을 말:**
+
+> 휴식할 때는 손만 보여도 됩니다. 편 손바닥을 1초 동안 유지하면 남은 휴식을 건너뛰고 다음 세트가 시작됩니다. 몸 전체를 다시 잡을 필요가 없습니다.
+
+**화면 자막:** 휴식 중에는 손만 인식 · 손바닥 1초로 휴식 건너뛰기
+
+### 02:02–02:21 · 바뀐 목표로 마지막 세트 수행
+
+**화면·조작:** 카운트다운 동안 다시 전신 옆모습이 보이는 위치로 돌아갑니다. 목표가 2회로 바뀌었는지 보여 준 뒤 스쿼트 2회를 수행합니다. 완료 상태(`done`)와 결과 화면을 담습니다.
+
+**읽을 말:**
+
+> 다음 세트에서는 다시 몸의 움직임을 측정합니다. 목표는 승인한 대로 두 번으로 바뀌었습니다. 마지막 세트를 마치면 운동이 완료되고 결과가 표시됩니다.
+
+**화면 자막:** 승인한 목표로 운동 · 세션 완료
+
+### 02:21–02:36 · LLM으로 결과 정리
+
+**화면·조작:** **명령 5**를 입력합니다. 완료한 세트 목록, 결과 화면, LLM의 답변을 함께 보여 줍니다.
+
+**읽을 말:**
+
+> 마지막으로 AI가 실제 기록을 바탕으로 운동 결과를 정리합니다. 활동 로그에서는 사용한 도구와 처리 결과를 확인할 수 있습니다.
+
+**화면 자막:** 기록에 근거한 결과 요약 · 확인할 수 있는 AI 활동
+
+### 02:36–02:45 · 마무리
+
+**화면·조작:** 결과 화면을 잠시 유지한 뒤 실제 서비스 주소와 저장소 주소가 적힌 마무리 화면을 보여 줍니다.
+
+**읽을 말:**
+
+> 폼코치는 움직임 측정과 AI, 사용자의 손동작을 WebMCP로 연결합니다. AI가 돕고, 사용자가 결정합니다.
+
+**화면 자막:** FormCoach · WebMCP로 연결하는 운동 경험
+
+## LLM에 복사해서 입력할 명령
+
+FormCoach 페이지와 연결된 브라우저 에이전트 대화창에 입력합니다. 앱이 직접 알아듣는 음성 명령이 아니라 **대화창에 보내는 텍스트 명령**입니다. 도구 호출 예시는 확인용이므로 직접 코드로 실행할 필요는 없습니다.
+
+### 명령 1 · 계획 생성
 
 ```text
-Use this page's WebMCP tools. Call createWorkoutPlan to create a squat plan with 2 sets, 3 reps per set, and 60 seconds rest. Use the note "Short demonstration". Then read the plan back. Keep your answer to one sentence.
+이 페이지의 WebMCP 도구를 사용해줘. createWorkoutPlan으로 스쿼트 2세트, 세트당 3회, 휴식 60초 계획을 만들어줘. 메모는 "짧은 시연"으로 해줘. 만든 계획을 다시 조회하고, 한글 한 문장으로 알려줘.
 ```
 
-Expected calls:
+예상 도구 호출:
 
 ```text
-createWorkoutPlan({"exercise":"squat","sets":2,"reps":3,"restSec":60,"userNote":"Short demonstration"})
+createWorkoutPlan({"exercise":"squat","sets":2,"reps":3,"restSec":60,"userNote":"짧은 시연"})
 getWorkoutPlan({})
 ```
 
-Check: `status: "created"`, `createdBy: "agent"`, phase remains `idle`. The native imperative tool is deliberately named `createWorkoutPlan`; `createPlan` is the separate declarative form, which some browsers may not expose.
+확인할 결과는 `status: "created"`, `createdBy: "agent"`입니다. 단계는 대기 상태(`idle`)로 유지됩니다. 여기서는 직접 호출하는 도구인 `createWorkoutPlan`을 사용합니다. `createPlan`은 별도의 폼 도구이며, 일부 브라우저에서는 노출되지 않을 수 있습니다.
 
-### 2. Start
-
-```text
-Start the first set using the page's WebMCP tool. Keep your answer brief.
-```
-
-Expected call: `startSet({})`. Wait for the three-second countdown to finish before moving. Complete three repetitions, then wait for `rest`.
-
-### 3. Read the results
+### 명령 2 · 첫 세트 시작
 
 ```text
-Read getLiveMetrics and getSetHistory. In one sentence, summarize the recorded reps and form flags from the completed set. Use only returned data; do not infer missing measurements or claim improvement.
+이 페이지의 WebMCP 도구로 첫 번째 세트를 시작해줘. 답변은 한글로 짧게 해줘.
 ```
 
-Expected calls: `getLiveMetrics({})`, `getSetHistory({})`. The history should contain the first completed set. While resting, body fields deliberately report no body measurement because the camera is tracking the hand.
+예상 호출: `startSet({})`.
 
-### 4. Propose a smaller next set
+3초 카운트다운이 끝난 뒤 스쿼트 3회를 수행합니다. 휴식 상태(`rest`)로 바뀐 것을 확인하고 다음 명령을 보냅니다.
+
+### 명령 3 · 첫 세트 결과 조회
 
 ```text
-For a shorter demo, use adjustProgram to reduce the target to 2 reps from the next set, with the reason "Shorter demo requested by the user". Wait for my gesture confirmation and report the actual outcome. Do not approve it for me.
+getLiveMetrics와 getSetHistory를 조회해줘. 방금 완료한 세트의 기록된 횟수와 자세 관련 신호를 한글 한 문장으로 정리해줘. 반환된 데이터만 사용하고, 없는 측정값이나 자세 개선 효과를 추측하지 마.
 ```
 
-Expected call:
+예상 호출: `getLiveMetrics({})`, `getSetHistory({})`.
+
+기록에 첫 번째 세트가 있어야 합니다. 휴식 중에는 손을 추적하므로 실시간 몸 측정값이 비어 있는 것이 정상입니다. 완료한 운동의 자세 정보는 세트 기록에서 확인합니다.
+
+### 명령 4 · 다음 세트 목표 줄이기
 
 ```text
-adjustProgram({"action":"reduce_reps","reps":2,"reason":"Shorter demo requested by the user"})
+시연을 짧게 하려고 해. adjustProgram으로 다음 세트부터 목표를 2회로 줄여줘. 이유는 "사용자가 짧은 시연을 요청함"으로 해줘. 내 손동작 승인을 기다렸다가 실제 처리 결과를 한글로 알려줘. 나 대신 승인하지 마.
 ```
 
-The overlay lasts up to 20 seconds. Raise both hands as soon as it appears; do not wait for a final chat answer, since the tool is still waiting for you. Only after `applied` and the return to `rest` should you show the open palm. Approval uses body tracking; skipping rest uses hand tracking. They are separate interactions.
-
-### 5. Summarize
+예상 도구 호출:
 
 ```text
-Read my completed set history and current metrics. Summarize total recorded reps, completed sets, and observed form flags in two short sentences. Use the returned values only. Do not claim that my form improved unless the data supports it.
+adjustProgram({"action":"reduce_reps","reps":2,"reason":"사용자가 짧은 시연을 요청함"})
 ```
 
-Expected calls: `getSetHistory({})`, `getLiveMetrics({})`. A clean run of this script records two sets and five reps. Use the actual recorded totals in captions if the take differs. The final set automatically ends the session, so `endSession` is not exposed at `done`.
+승인 창의 대기 시간은 최대 20초입니다. **LLM의 최종 답변을 기다리지 말고, 승인 창이 뜨면 바로 양손을 올리세요.** 도구 호출 자체가 사용자의 응답을 기다리고 있기 때문입니다.
 
-## Rehearsal and alternate takes
+`applied` 결과가 나오고 휴식 상태(`rest`)로 돌아온 뒤에 손바닥을 보여 줍니다. **변경 승인은 몸 인식**, **휴식 건너뛰기는 손 인식**을 사용하므로 순서대로 따로 촬영합니다.
 
-| Situation | What to do |
+### 명령 5 · 최종 결과 요약
+
+```text
+완료한 세트 기록과 현재 운동 상태를 조회해줘. 총 기록 횟수, 완료한 세트 수, 관찰된 자세 관련 신호를 한글 두 문장으로 요약해줘. 반환된 값만 사용하고, 데이터로 확인되지 않는 자세 개선 효과는 말하지 마.
+```
+
+예상 호출: `getSetHistory({})`, `getLiveMetrics({})`.
+
+대본대로 진행하면 **2세트, 총 5회**가 기록됩니다. 실제 촬영 결과가 다르면 자막에도 실제 값을 씁니다. 마지막 세트를 마치면 자동으로 종료되므로, 완료 상태(`done`)에서는 `endSession`을 호출할 필요가 없습니다.
+
+## 촬영 중 막혔을 때
+
+| 상황 | 조치 |
 |---|---|
-| Agent response takes too long | Cut waiting time in the edit. While in `rest`, the agent can call `setRest({"seconds":60})` to reset the remaining timer before the next shot. Show any relevant call in the activity log. |
-| Proposal times out | The plan stays unchanged. Submit prompt 4 again while in `rest` and capture a fresh proposal and its real acceptance. |
-| Body approval is not detected | Face the camera with your head, shoulders, wrists, and hips in frame. Hold both wrists above your nose for about one second. The visible **Accept** button is a working fallback; if used, narrate button approval instead of claiming gesture approval. |
-| Hand model is loading or unavailable | Wait until ready or use **Skip rest**. To make the hand-only claim in the main film, capture a successful real palm hold. |
-| Counting does not match the intended reps | Adjust the camera view and rehearse again. The edit and narration must agree with the displayed measurements. |
-| Session finishes before the final prompt | Use the read tools. Do not ask for `endSession` at `done`. |
-| Need to end early | During an active session, ask “End the session and summarize the result.” `endSession({})` returns the summary, including a partial set where applicable. |
+| LLM 응답이 오래 걸림 | 대기 시간은 편집으로 줄입니다. 다음 장면을 준비하는 동안 휴식이 부족하면, 휴식 상태에서 LLM에게 휴식을 다시 60초로 설정해 달라고 요청합니다. 호출은 `setRest({"seconds":60})`입니다. |
+| 승인 시간이 초과됨 | 계획은 바뀌지 않습니다. 휴식 상태에서 명령 4를 직접 다시 보내고, 새 승인 창에서 양손을 올리는 장면을 촬영합니다. |
+| 양손 승인이 인식되지 않음 | 정면에서 머리·어깨·손목·엉덩이가 모두 보이는지 확인합니다. 양 손목을 코보다 높게 약 1초 유지합니다. **Accept** 버튼으로 승인할 수도 있습니다. 버튼을 사용한 장면에서는 내레이션도 ‘버튼으로 승인합니다’로 바꿉니다. |
+| 손 모델이 로딩 중이거나 인식 불가 상태임 | 준비될 때까지 기다립니다. **Skip rest** 버튼을 사용할 수도 있지만, 손바닥 인식 기능을 설명하는 장면에는 실제로 손바닥으로 성공한 모습을 담습니다. |
+| 횟수가 예상과 다르게 측정됨 | 카메라 각도와 전신 구도를 조정하고 다시 연습합니다. 영상의 설명과 자막은 화면에 표시된 실제 측정값에 맞춥니다. |
+| 마지막 명령 전에 운동이 이미 끝남 | 기록 조회 도구로 결과를 확인합니다. `done` 상태에서 종료 도구를 다시 호출하지 않습니다. |
+| 운동을 중간에 끝내야 함 | 운동이 진행 중일 때 ‘운동을 끝내고 결과를 정리해줘’라고 요청합니다. `endSession({})`이 결과를 반환하며, 진행 중이던 세트의 기록도 해당하는 경우 포함됩니다. |
 
-### Camera-free rehearsal
+### 카메라 없이 순서만 연습하기
 
-Open `http://localhost:5173/?debug=1&replay=none` and use the debug panel's existing fixture controls. Keep a visible caption **“Replay mode — synthetic landmark data”** throughout any footage used from this mode. A replay exercises the measurement and session code; it does not demonstrate live camera recognition.
+[재생 연습 화면](http://localhost:5173/?debug=1&replay=none)을 열면 디버그 패널에서 합성 관절·손 좌표 데이터를 재생할 수 있습니다. 이 방식으로 찍은 장면을 영상에 사용한다면 **‘재생 모드 — 합성 좌표 데이터’** 자막을 계속 표시합니다. 제출용 영어 자막은 **“Replay mode — synthetic landmark data”**로 붙입니다. 이 모드는 운동 처리 흐름을 재현하며, 실제 카메라 인식을 촬영하는 방식은 아닙니다.
 
-Use the same real browser-agent prompts above. In `set`, play `squat_10reps_side` at 4× and allow it to finish before the next fixture. In `rest`, play `gesture_open_palm` at 1×. Wait for the next countdown to finish, then play the squat fixture again for the second set. Gesture fixtures must run at 1× so their hold durations are observable.
+LLM 명령은 위와 동일하게 사용하고, 운동 동작만 다음 순서로 재생합니다.
 
-The confirmation overlay covers the debug panel. For a gesture rehearsal while in `awaiting_confirmation`, feed the fixture from the browser's developer console instead:
+1. 운동 상태(`set`)에서 `squat_10reps_side`를 4배속으로 재생합니다. 재생이 끝난 뒤 다음 단계로 넘어갑니다.
+2. 명령 4로 승인 창을 띄웁니다. 창이 디버그 패널을 가리므로, 아래 코드를 브라우저 개발자 콘솔에 입력해 양손 승인 데이터를 재생합니다.
+3. 휴식 상태(`rest`)로 돌아오면 디버그 패널에서 `gesture_open_palm`을 1배속으로 재생합니다.
+4. 다음 카운트다운이 끝나면 스쿼트 데이터를 다시 재생해 두 번째 세트를 완료합니다.
+
+승인 장면에서 사용할 개발자 콘솔 코드:
 
 ```js
 await window.__formcoach.replay("gesture_hands_up", 1)
 ```
 
-This command supplies synthetic sensor frames only. Continue to invoke workout tools through the actual browser agent. Alternatively, use the overlay's Accept button and describe that take as button approval.
+이 코드는 합성 센서 데이터만 공급합니다. 운동 계획 생성이나 변경 등의 도구는 계속 실제 브라우저 에이전트로 호출합니다. 양손·손바닥 데이터는 유지 시간이 눈에 보이도록 **1배속**으로 재생합니다. 콘솔 대신 **Accept** 버튼을 사용했다면 버튼 승인으로 설명합니다.
 
-The debug bridge and a mocked browser API are useful for automated tests, but are not proof that a live browser agent discovered and invoked WebMCP. Keep real site-tool calls in the filmed WebMCP demonstration.
+디버그 브리지나 모의 브라우저 API 테스트만으로 실제 WebMCP 연결을 보여 줄 수는 없습니다. WebMCP 시연 장면에는 브라우저 에이전트의 실제 사이트 도구 호출을 담으세요.
 
-## Export and submission
+## 편집과 제출
 
-Export the edit at approximately 2:45, leaving margin below the strict three-minute limit. Include English voice-over and readable English captions. Replace the end-card placeholders with the actual live URL and [repository URL](https://github.com/bgradecoding/fromcoach); do not submit localhost as the live app. Upload with public visibility on YouTube and review the exported file from beginning to end.
+최종 영상은 **약 2분 45초**로 편집합니다. 한글 내레이션에 읽기 쉬운 영어 자막을 추가합니다. 마무리 화면에는 실제 배포 주소와 [저장소 주소](https://github.com/bgradecoding/fromcoach)를 넣습니다. 로컬 주소인 `localhost`는 제출용 서비스 주소로 쓰지 않습니다.
 
-The [official rules](https://webmcp.devpost.com/rules) require a functioning demonstration with audio explaining the product and its WebMCP use, a video under three minutes publicly visible on YouTube, and English materials or translations. See [DEVPOST.md](DEVPOST.md) for the submission checklist.
+유튜브에 공개 상태로 올리고, 업로드한 영상을 처음부터 끝까지 확인합니다. [공식 규정](https://webmcp.devpost.com/rules)은 **3분 미만 영상**, 제품과 WebMCP 사용 방식을 설명하는 음성, 유튜브 공개 영상, 영어 자료 또는 영어 번역을 요구합니다. 나머지 제출 항목은 [제출 체크리스트](DEVPOST.md)를 참고하세요.
