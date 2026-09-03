@@ -98,12 +98,12 @@ test("demo sequence: agent plan, gesture approval, palm rest skip, final results
   await page.waitForFunction(() => !!(window as any).__formcoach);
   // Synthetic frames verify the filmed sequence's state transitions, not camera recognition.
   await page.evaluate(() => (window as any).__formcoach.callTool("createWorkoutPlan", {
-    exercise: "squat", sets: 2, reps: 3, restSec: 60, userNote: "Short demonstration",
+    exercise: "pushup", sets: 2, reps: 3, restSec: 60, userNote: "Short demonstration",
   }));
   await expect(page.locator(".agent-badge")).toHaveText("Created by agent");
   await page.evaluate(() => (window as any).__formcoach.callTool("startSet"));
   await page.waitForFunction(() => (window as any).__formcoach.phase() === "set");
-  await page.evaluate(() => (window as any).__formcoach.replay("squat_10reps_side", 4));
+  await page.evaluate(() => (window as any).__formcoach.replay("pushup_5reps_side", 4));
   expect(await page.evaluate(() => (window as any).__formcoach.callTool("getLiveMetrics")))
     .toMatchObject({ phase: "rest", trackingMode: "palm", personDetected: false });
 
@@ -120,7 +120,7 @@ test("demo sequence: agent plan, gesture approval, palm rest skip, final results
   await page.waitForFunction(() => (window as any).__formcoach.phase() === "set");
   expect(await page.evaluate(() => (window as any).__formcoach.callTool("getLiveMetrics")))
     .toMatchObject({ targetReps: 2, trackingMode: "pose" });
-  await page.evaluate(() => (window as any).__formcoach.replay("squat_10reps_side", 4));
+  await page.evaluate(() => (window as any).__formcoach.replay("pushup_5reps_side", 4));
   expect(await page.evaluate(() => (window as any).__formcoach.phase())).toBe("done");
   const history = await page.evaluate(() => (window as any).__formcoach.callTool("getSetHistory"));
   expect(history).toMatchObject([{ reps: 3, target: 3 }, { reps: 2, target: 2 }]);

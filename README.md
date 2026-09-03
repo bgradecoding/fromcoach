@@ -49,12 +49,12 @@ Eight imperative tools plus a declarative form where the browser supports it. Re
 
 Short demo prompts (full shot list and narration: [Demo video script](docs/DEMO_VIDEO_SCRIPT.md)):
 
-1. "Create a squat plan with 2 sets, 3 reps per set, and 60 seconds rest. Note: Short demonstration."
+1. "Create a pushup plan with 2 sets, 3 reps per set, and 60 seconds rest. Note: Short demonstration."
 2. "Start the first set."
-3. *(complete the first set)* "Read my metrics and set history. Summarize only the recorded measurements."
+3. *(complete three pushups)* "Read my metrics and set history. Summarize only the recorded measurements."
 4. "For a shorter demo, reduce the target to 2 reps from the next set. Ask for confirmation."
 5. *(raise both hands to accept, then hold an open palm for one second during rest)*
-6. *(complete the next set)* "Summarize my completed sets and recorded form flags."
+6. *(complete two pushups)* "Summarize my completed sets and recorded form flags."
 
 For an early finish, ask "End the session and summarize it" while a session is active. At `done`, the summary already exists and `endSession` is no longer exposed. The agent should use the read tools.
 

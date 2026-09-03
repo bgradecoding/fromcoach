@@ -12,7 +12,7 @@
 
 1. 연습할 때는 `npm run dev`를 실행하고 [로컬 앱](http://localhost:5173/)을 엽니다. 최종 촬영은 가능하면 배포된 주소에서 진행합니다. WebMCP가 작동하는 브라우저에서 **앱 화면과 LLM 대화창을 함께** 보여 주세요.
 2. 앱을 대기 상태(`idle`) 또는 완료 상태(`done`)로 준비합니다. 필요하면 새로고침합니다. 저장된 계획이 남아 있어도 첫 번째 명령으로 새 계획을 만들 수 있습니다. 실제 카메라 촬영에서는 주소에 재생용 매개변수를 붙이지 않습니다.
-3. 카메라를 허용하고 모델이 로딩될 때까지 기다립니다. 스쿼트는 **전신이 옆모습으로** 보이게 잡습니다. 제안 승인 때는 카메라 정면을 보고 **머리·어깨·양 손목·양쪽 엉덩이가 모두** 보이게 합니다. 양 손목을 코보다 높게 약 1초 유지하는 동작을 미리 연습합니다.
+3. 카메라를 허용하고 모델이 로딩될 때까지 기다립니다. 푸시업 자세에서 **머리부터 발목까지 옆모습으로** 보이게 잡습니다. 특히 어깨·팔꿈치·손목이 가려지지 않게 합니다. 제안 승인 때는 일어나서 카메라 정면을 보고 **머리·어깨·양 손목·양쪽 엉덩이가 모두** 보이게 합니다. 양 손목을 코보다 높게 약 1초 유지하는 동작을 미리 연습합니다.
 4. 휴식 중에는 손 인식이 준비된 것을 확인한 뒤 손바닥을 보여 주세요. 이 장면에서는 몸 전체가 화면에 들어올 필요가 없습니다.
 5. 브라우저의 사이트 도구 목록에 `createWorkoutPlan`이 있는지 확인합니다. LLM으로 호출한 뒤 앱의 **Agent log**에 호출 출처가 **agent**로 표시되는지 확인합니다. **bridge**는 디버그 경로이므로 실제 브라우저 에이전트 호출 장면과 구분합니다.
 6. 1920×1080 이상으로 녹화하고 글자가 읽히는 크기로 화면을 배치합니다. 카메라 화면, 현재 단계와 횟수, Agent log가 보이도록 합니다. 설명 음성은 따로 녹음해 얹어도 됩니다. 내레이션과 앱 안내 음성이 겹치면 앱 소리를 줄입니다.
@@ -34,17 +34,17 @@
 
 ### 00:12–00:32 · LLM으로 운동 계획 만들기
 
-**화면·조작:** 아래의 **명령 1**을 입력합니다. `createWorkoutPlan` 호출과 `created` 결과, **3회씩 2세트·휴식 60초** 계획, **Created by agent** 표시를 보여 줍니다.
+**화면·조작:** 아래의 **명령 1**을 입력합니다. `createWorkoutPlan` 호출과 `created` 결과, **푸시업 3회씩 2세트·휴식 60초** 계획, **Created by agent** 표시를 보여 줍니다.
 
 **읽을 말:**
 
-> 먼저 짧은 스쿼트 계획을 요청합니다. AI가 WebMCP 도구를 호출하면 이 페이지에 계획이 바로 만들어집니다. 누가 만들었는지, 어떤 도구를 사용했는지도 확인할 수 있습니다.
+> 먼저 짧은 푸시업 계획을 요청합니다. AI가 WebMCP 도구를 호출하면 이 페이지에 계획이 바로 만들어집니다. 누가 만들었는지, 어떤 도구를 사용했는지도 확인할 수 있습니다.
 
 **화면 자막:** 자연어 요청 → WebMCP 호출 → 운동 계획 생성
 
 ### 00:32–00:57 · 첫 세트 시작과 측정
 
-**화면·조작:** **명령 2**를 입력합니다. 3초 카운트다운이 끝나면 스쿼트 3회를 수행합니다. 횟수가 실제로 올라가고 휴식 상태(`rest`)로 바뀌는 모습을 담습니다.
+**화면·조작:** **명령 2**를 입력합니다. 3초 카운트다운이 끝나면 푸시업 3회를 수행합니다. 팔꿈치를 충분히 굽히고 다시 펴서 횟수가 실제로 올라가게 합니다. 휴식 상태(`rest`)로 바뀌는 모습까지 담습니다.
 
 **읽을 말:**
 
@@ -84,7 +84,7 @@
 
 ### 02:02–02:21 · 바뀐 목표로 마지막 세트 수행
 
-**화면·조작:** 카운트다운 동안 다시 전신 옆모습이 보이는 위치로 돌아갑니다. 목표가 2회로 바뀌었는지 보여 준 뒤 스쿼트 2회를 수행합니다. 완료 상태(`done`)와 결과 화면을 담습니다.
+**화면·조작:** 카운트다운 동안 다시 푸시업 옆모습이 보이는 위치로 돌아갑니다. 목표가 2회로 바뀌었는지 보여 준 뒤 푸시업 2회를 수행합니다. 완료 상태(`done`)와 결과 화면을 담습니다.
 
 **읽을 말:**
 
@@ -119,13 +119,13 @@ FormCoach 페이지와 연결된 브라우저 에이전트 대화창에 입력�
 ### 명령 1 · 계획 생성
 
 ```text
-이 페이지의 WebMCP 도구를 사용해줘. createWorkoutPlan으로 스쿼트 2세트, 세트당 3회, 휴식 60초 계획을 만들어줘. 메모는 "짧은 시연"으로 해줘. 만든 계획을 다시 조회하고, 한글 한 문장으로 알려줘.
+Use this page's WebMCP tools. Call createWorkoutPlan to create a pushup plan with 2 sets, 3 reps per set, and 60 seconds of rest. Use the note "Short demonstration". Read the plan back and reply in one short sentence.
 ```
 
 예상 도구 호출:
 
 ```text
-createWorkoutPlan({"exercise":"squat","sets":2,"reps":3,"restSec":60,"userNote":"짧은 시연"})
+createWorkoutPlan({"exercise":"pushup","sets":2,"reps":3,"restSec":60,"userNote":"Short demonstration"})
 getWorkoutPlan({})
 ```
 
@@ -134,17 +134,17 @@ getWorkoutPlan({})
 ### 명령 2 · 첫 세트 시작
 
 ```text
-이 페이지의 WebMCP 도구로 첫 번째 세트를 시작해줘. 답변은 한글로 짧게 해줘.
+Use this page's WebMCP tool to start the first set. Keep your reply brief.
 ```
 
 예상 호출: `startSet({})`.
 
-3초 카운트다운이 끝난 뒤 스쿼트 3회를 수행합니다. 휴식 상태(`rest`)로 바뀐 것을 확인하고 다음 명령을 보냅니다.
+3초 카운트다운이 끝난 뒤 푸시업 3회를 수행합니다. 휴식 상태(`rest`)로 바뀐 것을 확인하고 다음 명령을 보냅니다.
 
 ### 명령 3 · 첫 세트 결과 조회
 
 ```text
-getLiveMetrics와 getSetHistory를 조회해줘. 방금 완료한 세트의 기록된 횟수와 자세 관련 신호를 한글 한 문장으로 정리해줘. 반환된 데이터만 사용하고, 없는 측정값이나 자세 개선 효과를 추측하지 마.
+Call getLiveMetrics and getSetHistory. In one short sentence, summarize the recorded reps and form flags from the completed set. Use only the returned data. Do not infer missing measurements or claim improvement.
 ```
 
 예상 호출: `getLiveMetrics({})`, `getSetHistory({})`.
@@ -154,13 +154,13 @@ getLiveMetrics와 getSetHistory를 조회해줘. 방금 완료한 세트의 기�
 ### 명령 4 · 다음 세트 목표 줄이기
 
 ```text
-시연을 짧게 하려고 해. adjustProgram으로 다음 세트부터 목표를 2회로 줄여줘. 이유는 "사용자가 짧은 시연을 요청함"으로 해줘. 내 손동작 승인을 기다렸다가 실제 처리 결과를 한글로 알려줘. 나 대신 승인하지 마.
+For a shorter demonstration, call adjustProgram to reduce the target to 2 reps from the next set. Use the reason "Shorter demonstration requested by the user". Wait for my gesture confirmation, then report the actual outcome. Do not approve it for me.
 ```
 
 예상 도구 호출:
 
 ```text
-adjustProgram({"action":"reduce_reps","reps":2,"reason":"사용자가 짧은 시연을 요청함"})
+adjustProgram({"action":"reduce_reps","reps":2,"reason":"Shorter demonstration requested by the user"})
 ```
 
 승인 창의 대기 시간은 최대 20초입니다. **LLM의 최종 답변을 기다리지 말고, 승인 창이 뜨면 바로 양손을 올리세요.** 도구 호출 자체가 사용자의 응답을 기다리고 있기 때문입니다.
@@ -170,7 +170,7 @@ adjustProgram({"action":"reduce_reps","reps":2,"reason":"사용자가 짧은 시
 ### 명령 5 · 최종 결과 요약
 
 ```text
-완료한 세트 기록과 현재 운동 상태를 조회해줘. 총 기록 횟수, 완료한 세트 수, 관찰된 자세 관련 신호를 한글 두 문장으로 요약해줘. 반환된 값만 사용하고, 데이터로 확인되지 않는 자세 개선 효과는 말하지 마.
+Read my completed set history and current workout metrics. In two short sentences, summarize the total recorded reps, completed sets, and observed form flags. Use only the returned values. Do not claim improvement unless the data supports it.
 ```
 
 예상 호출: `getSetHistory({})`, `getLiveMetrics({})`.
@@ -187,7 +187,7 @@ adjustProgram({"action":"reduce_reps","reps":2,"reason":"사용자가 짧은 시
 | 손 모델이 로딩 중이거나 인식 불가 상태임 | 준비될 때까지 기다립니다. **Skip rest** 버튼을 사용할 수도 있지만, 손바닥 인식 기능을 설명하는 장면에는 실제로 손바닥으로 성공한 모습을 담습니다. |
 | 횟수가 예상과 다르게 측정됨 | 카메라 각도와 전신 구도를 조정하고 다시 연습합니다. 영상의 설명과 자막은 화면에 표시된 실제 측정값에 맞춥니다. |
 | 마지막 명령 전에 운동이 이미 끝남 | 기록 조회 도구로 결과를 확인합니다. `done` 상태에서 종료 도구를 다시 호출하지 않습니다. |
-| 운동을 중간에 끝내야 함 | 운동이 진행 중일 때 ‘운동을 끝내고 결과를 정리해줘’라고 요청합니다. `endSession({})`이 결과를 반환하며, 진행 중이던 세트의 기록도 해당하는 경우 포함됩니다. |
+| 운동을 중간에 끝내야 함 | 운동이 진행 중일 때 `End the workout session and summarize the result.`라고 입력합니다. `endSession({})`이 결과를 반환하며, 진행 중이던 세트의 기록도 해당하는 경우 포함됩니다. |
 
 ### 카메라 없이 순서만 연습하기
 
@@ -195,10 +195,10 @@ adjustProgram({"action":"reduce_reps","reps":2,"reason":"사용자가 짧은 시
 
 LLM 명령은 위와 동일하게 사용하고, 운동 동작만 다음 순서로 재생합니다.
 
-1. 운동 상태(`set`)에서 `squat_10reps_side`를 4배속으로 재생합니다. 재생이 끝난 뒤 다음 단계로 넘어갑니다.
+1. 운동 상태(`set`)에서 `pushup_5reps_side`를 4배속으로 재생합니다. 재생이 끝난 뒤 다음 단계로 넘어갑니다.
 2. 명령 4로 승인 창을 띄웁니다. 창이 디버그 패널을 가리므로, 아래 코드를 브라우저 개발자 콘솔에 입력해 양손 승인 데이터를 재생합니다.
 3. 휴식 상태(`rest`)로 돌아오면 디버그 패널에서 `gesture_open_palm`을 1배속으로 재생합니다.
-4. 다음 카운트다운이 끝나면 스쿼트 데이터를 다시 재생해 두 번째 세트를 완료합니다.
+4. 다음 카운트다운이 끝나면 푸시업 데이터를 다시 재생해 두 번째 세트를 완료합니다.
 
 승인 장면에서 사용할 개발자 콘솔 코드:
 
