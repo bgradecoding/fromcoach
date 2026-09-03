@@ -268,6 +268,10 @@ export const store = {
   setConfirmTimeoutMs(ms: number) {
     confirmTimeoutMs = ms;
   },
+
+  getConfirmTimeoutMs() {
+    return confirmTimeoutMs;
+  },
 };
 
 export function useSessionState(): SessionState {

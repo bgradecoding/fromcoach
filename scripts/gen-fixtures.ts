@@ -91,6 +91,8 @@ function squatSide() {
     set(lm, LM.NOSE, { x: 0.5, y: 0.12 });
     set(lm, LM.LEFT_SHOULDER, { x: 0.52, y: 0.18 });
     set(lm, LM.RIGHT_SHOULDER, { x: 0.49, y: 0.18 }, 0.6); // side: shoulders overlap
+    set(lm, LM.LEFT_ELBOW, { x: 0.54, y: 0.34 });
+    set(lm, LM.RIGHT_ELBOW, { x: 0.51, y: 0.34 }, 0.6);
     set(lm, LM.LEFT_WRIST, { x: 0.52, y: 0.5 });
     set(lm, LM.RIGHT_WRIST, { x: 0.49, y: 0.5 }, 0.6);
     set(lm, LM.LEFT_HIP, hip);
@@ -119,6 +121,8 @@ function squatFrontValgus() {
     set(lm, LM.NOSE, { x: 0.5, y: 0.1 });
     set(lm, LM.LEFT_SHOULDER, { x: 0.72, y: 0.2 });
     set(lm, LM.RIGHT_SHOULDER, { x: 0.28, y: 0.2 });
+    set(lm, LM.LEFT_ELBOW, { x: 0.73, y: 0.33 });
+    set(lm, LM.RIGHT_ELBOW, { x: 0.27, y: 0.33 });
     set(lm, LM.LEFT_WRIST, { x: 0.74, y: 0.45 });
     set(lm, LM.RIGHT_WRIST, { x: 0.26, y: 0.45 });
     const mid = 0.5;

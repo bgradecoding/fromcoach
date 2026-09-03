@@ -135,6 +135,11 @@ export class ExerciseTracker {
   get exerciseFamily(): ExerciseFamily {
     return this.cfg.family;
   }
+
+  /** Landmark index of the angle vertex (knee/elbow) on the tracked side. */
+  get vertexIndex(): number {
+    return sideIdx(this.side)[this.cfg.joints[1]];
+  }
 }
 
 // ---------- engine singleton ----------
@@ -147,6 +152,8 @@ export interface EngineSnapshot {
   view: ViewKind;
   currentAngle: number | null;
   exercise: string | null;
+  /** Landmark index to label with the current angle on the canvas. */
+  vertexIndex: number | null;
 }
 
 const state = {
@@ -231,5 +238,6 @@ export function getEngineSnapshot(): EngineSnapshot {
     view: state.view,
     currentAngle: state.currentAngle,
     exercise: state.exercise,
+    vertexIndex: state.tracker ? state.tracker.vertexIndex : null,
   };
 }
