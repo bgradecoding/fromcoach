@@ -21,7 +21,7 @@ Seven imperative tools plus one declarative form. Read tools are annotated `read
 | Tool | What it does | Read-only |
 |---|---|---|
 | `getWorkoutPlan` | Today's plan: blocks, creator (user/agent), injury note | ✓ |
-| `getLiveMetrics` | Live phase, reps, joint angle, view, form flags, rest timer | ✓ |
+| `getLiveMetrics` | Live phase, reps, joint angle, view, form flags, rest timer, palm detection and hold progress | ✓ |
 | `getSetHistory` | Completed sets: reps vs target, flag counts, avg tempo | ✓ |
 | `startSet` | Starts the next set after a 3s countdown | |
 | `setRest` | Sets rest duration (10–600s), live timer included | |
@@ -61,6 +61,7 @@ No camera? Append `?debug=1` to the URL for the debug panel and replay recorded 
 ## The human–agent experience
 
 - **Gesture confirmation:** `adjustProgram` returns a pending promise until you raise both hands (accept), cross your arms (decline), or 20s pass. On-screen buttons exist as a fallback.
+- **Skip rest with a palm:** while resting, show an open palm to the camera and hold it for 1 second. Only your hand needs to be visible. The camera switches to MediaPipe Gesture Recognizer during rest and resumes body-pose tracking for the next set. A progress bar shows the hold; briefly showing a hand, making a fist, or losing tracking does not skip rest. The Skip rest button remains available while the hand model loads or if detection is unavailable.
 - **Agent log:** every tool call is rendered in the UI with source (browser agent vs debug bridge), status, and latency — you always see what the agent did.
 - **`agentInvoked` attribution:** a plan submitted by the agent through the declarative form gets a "Created by agent" badge.
 - **Voice:** the page speaks proposals and set completions via `speechSynthesis`.
@@ -82,6 +83,8 @@ webcam ──▶ MediaPipe Pose (in-tab, on-device)
 
 Privacy: no backend, no accounts, no uploads. Video frames never leave the `<video>` element; tools return JSON numbers and strings. The plan is kept in `localStorage`, set history in memory.
 
+During rest, `getLiveMetrics` reports `trackingMode: "palm"`, `handTracking` (`loading`, `ready`, or `unavailable`), `handDetected`, `palmDetected`, and `palmHoldProgress` (0–1). Body fields report `personDetected: false`, `view: "unknown"`, and `currentAngle: null` because rest does not require a full-body view. Outside rest, `trackingMode` returns to `pose` and `handTracking` is `inactive`. Program-change confirmation continues to use the existing body gestures.
+
 ## Run locally
 
 ```bash
@@ -102,6 +105,7 @@ __formcoach.listTools()                  // internal registry (mirrors the brows
 __formcoach.callTool(name, input)        // same execute path a real agent hits
 __formcoach.phase()                      // current session phase
 __formcoach.replay("squat_10reps_side", 4) // feed a fixture through the engine
+__formcoach.replay("gesture_open_palm", 1) // while resting: hand-only frames skip rest
 __formcoach.setConfirmTimeoutMs(3000)    // shrink the gesture timeout for tests
 ```
 
@@ -115,4 +119,4 @@ URL params: `?debug=1` (debug panel) · `?replay=<fixture|none>` (skip camera) �
 
 ## License & credits
 
-MIT. Built with [MediaPipe Tasks Vision](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js), React, TypeScript, Vite, Vitest, Playwright.
+MIT. Built with [MediaPipe Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js), [MediaPipe Gesture Recognizer](https://ai.google.dev/edge/mediapipe/solutions/vision/gesture_recognizer/web_js), React, TypeScript, Vite, Vitest, Playwright.

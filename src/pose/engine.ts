@@ -4,11 +4,12 @@
 // subscribes to rep/gesture events; it never sees a video frame.
 import { angle3, createEma } from "./angles";
 import { createGestureDetector, type GestureEvent } from "./gestures";
+import { createPalmDetector } from "./palm";
 import { createRepCounter } from "./repCounter";
 import { frameViolations, sideIdx, type BodySide, type ExerciseFamily } from "./rules";
 import { ReplayPoseSource } from "./sources/replay";
 import { createViewClassifier } from "./view";
-import type { Frame, Landmark, RepRecord, ViewKind } from "./types";
+import type { Frame, HandTrackingStatus, Landmark, RepRecord, TrackingMode, ViewKind } from "./types";
 
 // ---------- frame hub ----------
 
@@ -149,6 +150,11 @@ export type GestureMode = "off" | "confirm" | "rest";
 export interface EngineSnapshot {
   cameraOk: boolean;
   personDetected: boolean;
+  trackingMode: TrackingMode;
+  handTracking: HandTrackingStatus | "inactive";
+  handDetected: boolean;
+  palmDetected: boolean;
+  palmHoldProgress: number;
   view: ViewKind;
   currentAngle: number | null;
   exercise: string | null;
@@ -166,9 +172,14 @@ const state = {
   currentAngle: null as number | null,
   lastFrameWall: 0,
   lastFrameT: Number.NEGATIVE_INFINITY,
+  handTracking: "inactive" as HandTrackingStatus | "inactive",
+  handDetected: false,
+  palmDetected: false,
+  palmHoldProgress: 0,
 };
 
 const gestureDetector = createGestureDetector(1000);
+const palmDetector = createPalmDetector(1000);
 const repListeners = new Set<(r: RepRecord) => void>();
 const gestureListeners = new Set<(g: GestureEvent) => void>();
 
@@ -192,20 +203,41 @@ export function setRepCounting(active: boolean): void {
 }
 
 export function setGestureMode(mode: GestureMode): void {
-  if (mode !== state.gestureMode) gestureDetector.reset();
+  if (mode !== state.gestureMode) {
+    gestureDetector.reset();
+    palmDetector.reset();
+    state.handDetected = false;
+    state.palmDetected = false;
+    state.palmHoldProgress = 0;
+    state.handTracking = mode === "rest" ? "loading" : "inactive";
+    // Rest has no body-pose contract, so don't expose the previous set's pose.
+    state.personDetected = false;
+    state.view = "unknown";
+    state.currentAngle = null;
+  }
   state.gestureMode = mode;
 }
 
-const MODE_GESTURES: Record<GestureMode, GestureEvent["type"][]> = {
-  off: [],
-  confirm: ["hands_up", "arms_crossed"],
-  rest: ["one_hand_up"],
-};
+export function getTrackingMode(): TrackingMode {
+  return state.gestureMode === "rest" ? "palm" : "pose";
+}
 
 onFrame((f) => {
   state.lastFrameWall = Date.now();
   if (f.t < state.lastFrameT) gestureDetector.reset(); // clock went backwards (source switch)
   state.lastFrameT = f.t;
+
+  if (state.gestureMode === "rest") {
+    state.handTracking = f.handTracking ?? "ready";
+    const palm = palmDetector.feed(state.handTracking === "ready" ? f.hands ?? [] : [], f.t);
+    state.handDetected = palm.handDetected;
+    state.palmDetected = palm.palmDetected;
+    state.palmHoldProgress = palm.progress;
+    if (palm.triggered) {
+      for (const fn of gestureListeners) fn({ type: "open_palm", t: f.t });
+    }
+    return;
+  }
 
   // No exercise configured yet: still track presence/view for the UI.
   if (!state.tracker && f.landmarks) {
@@ -223,21 +255,27 @@ onFrame((f) => {
     if (result.rep) for (const fn of repListeners) fn(result.rep);
   }
 
-  if (state.gestureMode !== "off" && f.landmarks) {
+  if (state.gestureMode === "confirm" && f.landmarks) {
     const ev = gestureDetector.feed(f.landmarks, f.t);
-    if (ev && MODE_GESTURES[state.gestureMode].includes(ev.type)) {
+    if (ev && (ev.type === "hands_up" || ev.type === "arms_crossed")) {
       for (const fn of gestureListeners) fn(ev);
     }
   }
 });
 
 export function getEngineSnapshot(): EngineSnapshot {
+  const handFresh = state.gestureMode === "rest" && Date.now() - state.lastFrameWall < 500;
   return {
     cameraOk: Date.now() - state.lastFrameWall < 2000,
     personDetected: state.personDetected,
+    trackingMode: getTrackingMode(),
+    handTracking: state.handTracking,
+    handDetected: handFresh && state.handDetected,
+    palmDetected: handFresh && state.palmDetected,
+    palmHoldProgress: handFresh ? state.palmHoldProgress : 0,
     view: state.view,
     currentAngle: state.currentAngle,
     exercise: state.exercise,
-    vertexIndex: state.tracker ? state.tracker.vertexIndex : null,
+    vertexIndex: state.gestureMode !== "rest" && state.tracker ? state.tracker.vertexIndex : null,
   };
 }

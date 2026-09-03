@@ -1,5 +1,5 @@
 // Generates synthetic landmark fixtures into fixtures/*.json.
-// Run: npm run gen:fixtures
+// Run: npm run gen:fixtures [-- fixture_name ...]
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -13,6 +13,8 @@ type Pt = { x: number; y: number };
 
 const FPS = 30;
 const OUT_DIR = join(process.cwd(), "fixtures");
+const requestedNames = new Set(process.argv.slice(2));
+const requested = (name: string) => requestedNames.size === 0 || requestedNames.has(name);
 
 const LM = {
   NOSE: 0,
@@ -46,6 +48,7 @@ function set(lm: Landmark[], idx: number, p: Pt, visibility = 0.9) {
 const round = (v: number) => Math.round(v * 1e4) / 1e4;
 
 function save(name: string, frames: Landmark[][]) {
+  if (!requested(name)) return;
   const fixture = {
     fps: FPS,
     frames: frames.map((landmarks, i) => ({
@@ -217,6 +220,33 @@ function gestureFixture(name: string, applyCondition: (lm: Landmark[]) => void) 
   save(name, frames);
 }
 
+// ---------- open palm: hand-only detection, with no body in frame ----------
+function palmFixture() {
+  const name = "gesture_open_palm";
+  if (!requested(name)) return;
+  // MediaPipe order: wrist, thumb, index, middle, ring, pinky.
+  const points: [number, number][] = [
+    [0.51, 0.70],
+    [0.46, 0.65], [0.40, 0.60], [0.35, 0.54], [0.31, 0.49],
+    [0.42, 0.51], [0.41, 0.40], [0.40, 0.33], [0.39, 0.28],
+    [0.49, 0.49], [0.49, 0.36], [0.49, 0.28], [0.49, 0.21],
+    [0.55, 0.50], [0.57, 0.38], [0.58, 0.31], [0.59, 0.26],
+    [0.60, 0.54], [0.64, 0.45], [0.67, 0.40], [0.69, 0.36],
+  ];
+  const frames = Array.from({ length: 3.5 * FPS }, (_, i) => ({
+    t: round((i / FPS) * 1000),
+    landmarks: null,
+    handTracking: "ready",
+    hands: i >= FPS && i < 2.5 * FPS ? [{
+      landmarks: points.map(([x, y]) => ({ x, y, z: 0, visibility: 0.99 })),
+      gesture: "Open_Palm",
+      score: 0.99,
+    }] : [],
+  }));
+  writeFileSync(join(OUT_DIR, `${name}.json`), JSON.stringify({ fps: FPS, frames }));
+  console.log(`${name}.json: ${frames.length} frames (${frames.length / FPS}s)`);
+}
+
 mkdirSync(OUT_DIR, { recursive: true });
 squatSide();
 squatFrontValgus();
@@ -238,3 +268,4 @@ gestureFixture("gesture_one_hand", (lm) => {
   set(lm, LM.LEFT_WRIST, { x: 0.6, y: 0.1 });
   set(lm, LM.LEFT_ELBOW, { x: 0.62, y: 0.18 });
 });
+palmFixture();

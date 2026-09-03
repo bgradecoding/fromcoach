@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { getEngineSnapshot, onFrame, pushFrame, replaySource } from "../pose/engine";
+import { getEngineSnapshot, getTrackingMode, onFrame, pushFrame, replaySource } from "../pose/engine";
 import { CameraPoseSource } from "../pose/sources/camera";
 import { fixtureNames } from "../pose/sources/replay";
-import { LM, type Landmark } from "../pose/types";
+import { LM, type HandObservation, type Landmark } from "../pose/types";
 import { store, useSessionState } from "../session/store";
 
 const W = 960;
@@ -63,6 +63,33 @@ function drawSkeleton(ctx: CanvasRenderingContext2D, landmarks: Landmark[] | nul
   }
 }
 
+const HAND_CHAINS = [[0, 1, 2, 3, 4], [0, 5, 6, 7, 8], [5, 9, 10, 11, 12],
+  [9, 13, 14, 15, 16], [13, 17, 18, 19, 20], [0, 17]];
+
+function drawHands(ctx: CanvasRenderingContext2D, hands: HandObservation[]) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.lineWidth = 3;
+  for (const hand of hands) {
+    ctx.strokeStyle = hand.gesture === "Open_Palm" && hand.score >= 0.75 ? "#4ade80" : "#9aa5b1";
+    for (const chain of HAND_CHAINS) {
+      ctx.beginPath();
+      for (const [i, index] of chain.entries()) {
+        const point = hand.landmarks[index];
+        if (!point) continue;
+        if (i === 0) ctx.moveTo(point.x * W, point.y * H);
+        else ctx.lineTo(point.x * W, point.y * H);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#ffffff";
+    for (const point of hand.landmarks) {
+      ctx.beginPath();
+      ctx.arc(point.x * W, point.y * H, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
 interface Props {
   useCamera: boolean;
 }
@@ -80,6 +107,7 @@ export default function CameraView({ useCamera }: Props) {
   const [guidance, setGuidance] = useState<string | null>(null);
   const [cue, setCue] = useState<string | null>(null);
   const session = useSessionState();
+  const resting = session.phase === "rest";
   const mirrored = cameraState === "on";
   const mirroredRef = useRef(false);
 
@@ -89,7 +117,7 @@ export default function CameraView({ useCamera }: Props) {
 
   useEffect(() => {
     if (!useCamera || !videoRef.current) return;
-    const source = new CameraPoseSource(videoRef.current);
+    const source = new CameraPoseSource(videoRef.current, getTrackingMode);
     let cancelled = false;
     source
       .start(pushFrame)
@@ -108,13 +136,16 @@ export default function CameraView({ useCamera }: Props) {
   useEffect(() => {
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
     const off = onFrame((f) => {
+      const snap = getEngineSnapshot();
       const ctx = canvasRef.current?.getContext("2d");
-      if (ctx) drawSkeleton(ctx, f.landmarks);
+      if (ctx) {
+        if (snap.trackingMode === "palm") drawHands(ctx, f.hands ?? []);
+        else drawSkeleton(ctx, f.landmarks);
+      }
 
       // angle badge follows the tracked joint (HTML, so it never mirrors)
       const label = angleLabelRef.current;
       if (label) {
-        const snap = getEngineSnapshot();
         const vertex =
           snap.vertexIndex !== null && f.landmarks
             ? f.landmarks[snap.vertexIndex]
@@ -129,7 +160,9 @@ export default function CameraView({ useCamera }: Props) {
           label.hidden = true;
         }
         setGuidance(
-          !snap.personDetected
+          snap.trackingMode === "palm"
+            ? null
+            : !snap.personDetected
             ? "Stand back so your whole body is visible"
             : snap.view === "front"
               ? "Front view — knee tracking active"
@@ -148,6 +181,12 @@ export default function CameraView({ useCamera }: Props) {
       if (idleTimer) clearTimeout(idleTimer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!resting) return;
+    canvasRef.current?.getContext("2d")?.clearRect(0, 0, W, H);
+    if (angleLabelRef.current) angleLabelRef.current.hidden = true;
+  }, [resting]);
 
   // form cue: shown for 1.5s when a rep closes with flags
   useEffect(() => {
@@ -172,12 +211,12 @@ export default function CameraView({ useCamera }: Props) {
 
   return (
     <div className="camera-view">
-      <div className={`camera-stage${mirrored ? " mirrored" : ""}`}>
+      <div className={`camera-stage${mirrored ? " mirrored" : ""}${resting ? " is-resting" : ""}`}>
         <video ref={videoRef} autoPlay playsInline muted width={W} height={H} />
         <canvas ref={canvasRef} width={W} height={H} />
         <div ref={angleLabelRef} className="angle-label" hidden />
-        {guidance && !showFallback && <div className="view-guidance">{guidance}</div>}
-        {cue && <div className="form-cue">{cue}</div>}
+        {!resting && guidance && !showFallback && <div className="view-guidance">{guidance}</div>}
+        {!resting && cue && <div className="form-cue">{cue}</div>}
         {session.phase === "countdown" && <CountdownBig />}
         {showFallback && (
           <div className="camera-fallback">
@@ -206,8 +245,42 @@ export default function CameraView({ useCamera }: Props) {
             )}
           </div>
         )}
+        {resting && <RestPalmHint />}
       </div>
     </div>
+  );
+}
+
+function RestPalmHint() {
+  const [snap, setSnap] = useState(getEngineSnapshot);
+  useEffect(() => {
+    const timer = setInterval(() => setSnap(getEngineSnapshot()), 100);
+    return () => clearInterval(timer);
+  }, []);
+
+  const loading = snap.handTracking === "loading" || snap.handTracking === "inactive";
+  const unavailable = snap.handTracking === "unavailable";
+  const title = loading ? "Preparing hand detection…"
+    : unavailable ? "Hand detection unavailable"
+      : snap.palmDetected ? "Hold your palm steady"
+        : snap.handDetected ? "Open your hand toward the camera"
+          : "Show your open palm";
+
+  return (
+    <section className="rest-palm-hint" aria-label="Skip rest with an open palm">
+      <span className="rest-palm-icon" aria-hidden="true">✋</span>
+      <div className="rest-palm-copy">
+        <p className="rest-palm-title" role="status">{title}</p>
+        <p className="rest-palm-detail">
+          {unavailable ? "Use the Skip rest button to continue."
+            : loading ? "You can also use the Skip rest button."
+              : "Hold for 1 second to skip rest. Only your hand needs to be in view."}
+        </p>
+        {!loading && !unavailable && (
+          <progress aria-label="Open palm hold" max={100} value={Math.round(snap.palmHoldProgress * 100)} />
+        )}
+      </div>
+    </section>
   );
 }
 

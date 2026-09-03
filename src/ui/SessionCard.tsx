@@ -78,7 +78,7 @@ export default function SessionCard() {
             )}
           </div>
           {s.phase === "rest" && (
-            <p className="hint-line">Raise one hand to skip the rest.</p>
+            <p className="hint-line">Show an open palm to the camera for 1 second to skip rest.</p>
           )}
         </>
       )}

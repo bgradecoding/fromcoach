@@ -3,7 +3,7 @@ import { LM, type Landmark } from "./types";
 export type GestureType = "hands_up" | "arms_crossed" | "one_hand_up";
 
 export interface GestureEvent {
-  type: GestureType;
+  type: GestureType | "open_palm";
   t: number;
 }
 

@@ -42,7 +42,7 @@ export const TOOLS: Record<string, ToolDef> = {
     name: "getLiveMetrics",
     title: "Get live metrics",
     description:
-      "Returns the live rep count, joint angle, camera view, form flags, and rest timer measured by the webcam in this tab. Call this whenever the user asks how they are doing, or before deciding to adjust the program. Contains numbers only — no images. Read-only, safe to poll.",
+      "Returns the live rep count, joint angle, camera view, form flags, and rest timer measured by the webcam in this tab. During rest, trackingMode is palm: handDetected, palmDetected, palmHoldProgress (0-1), and handTracking report open-palm recognition for skipping rest; body pose is not tracked. Call this whenever the user asks how they are doing, or before deciding to adjust the program. Contains numbers and status fields only — no images. Read-only, safe to poll.",
     inputSchema: { type: "object", properties: {} },
     annotations: { readOnlyHint: true },
     execute: async () => store.getLiveMetrics(),

@@ -160,7 +160,7 @@ engine.onGesture((g) => {
   if (state.phase === "awaiting_confirmation") {
     if (g.type === "hands_up") resolveProposal("applied");
     else if (g.type === "arms_crossed") resolveProposal("rejected");
-  } else if (state.phase === "rest" && g.type === "one_hand_up") {
+  } else if (state.phase === "rest" && g.type === "open_palm") {
     dispatch({ type: "SKIP_REST", at: Date.now() });
   }
 });
@@ -252,6 +252,11 @@ export const store = {
       phase: state.phase,
       cameraOk: snap.cameraOk,
       personDetected: snap.personDetected,
+      trackingMode: snap.trackingMode,
+      handTracking: snap.handTracking,
+      handDetected: snap.handDetected,
+      palmDetected: snap.palmDetected,
+      palmHoldProgress: snap.palmHoldProgress,
       view: snap.view,
       exercise: state.activeExercise,
       setIndex: active ? state.setIndex : null,

@@ -7,12 +7,23 @@ export interface Landmark {
   visibility: number;
 }
 
+export type TrackingMode = "pose" | "palm";
+export type HandTrackingStatus = "loading" | "ready" | "unavailable";
+
+export interface HandObservation {
+  landmarks: Landmark[]; // 21 normalized hand landmarks; no body landmarks required
+  gesture: string;
+  score: number;
+}
+
 /** One pose sample. `t` is milliseconds on the source's own clock
  *  (camera: performance.now(), replay: fixture time). Engine logic
  *  must only rely on deltas within one source run. */
 export interface Frame {
   t: number;
   landmarks: Landmark[] | null; // 33 normalized landmarks, or null when no person
+  hands?: HandObservation[];
+  handTracking?: HandTrackingStatus;
 }
 
 export interface PoseSource {
@@ -47,6 +58,11 @@ export interface LiveMetrics {
   phase: Phase;
   cameraOk: boolean;
   personDetected: boolean;
+  trackingMode: TrackingMode;
+  handTracking: HandTrackingStatus | "inactive";
+  handDetected: boolean;
+  palmDetected: boolean;
+  palmHoldProgress: number; // 0–1; continuous open-palm hold to skip rest
   view: ViewKind;
   exercise: string | null;
   setIndex: number | null;

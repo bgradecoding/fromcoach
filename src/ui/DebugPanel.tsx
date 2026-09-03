@@ -38,8 +38,10 @@ export default function DebugPanel() {
       <header className="card-header">
         <h2>Debug</h2>
         <span className="debug-live">
-          angle {snap.currentAngle !== null ? `${Math.round(snap.currentAngle)}°` : "—"} · view{" "}
-          {snap.view} · person {snap.personDetected ? "yes" : "no"} · phase {store.get().phase}
+          {snap.trackingMode === "palm"
+            ? `hand ${snap.handDetected ? "yes" : "no"} · palm ${Math.round(snap.palmHoldProgress * 100)}% · ${snap.handTracking}`
+            : `angle ${snap.currentAngle !== null ? `${Math.round(snap.currentAngle)}°` : "—"} · view ${snap.view} · person ${snap.personDetected ? "yes" : "no"}`}
+          {" · phase "}{store.get().phase}
         </span>
       </header>
 
