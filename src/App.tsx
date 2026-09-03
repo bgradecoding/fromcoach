@@ -1,21 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
+import CameraView from "./ui/CameraView";
+import { replaySource } from "./pose/engine";
+import { REPLAY_PARAM, REPLAY_SPEED, USE_CAMERA } from "./params";
 
-// T0 hello world: prove the camera pipeline and deploy target work.
-// Replaced by the full app in later tasks.
 export default function App() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-
   useEffect(() => {
-    let stream: MediaStream | null = null;
-    navigator.mediaDevices
-      ?.getUserMedia({ video: { width: 1280, height: 720 }, audio: false })
-      .then((s) => {
-        stream = s;
-        if (videoRef.current) videoRef.current.srcObject = s;
-      })
-      .catch((e) => setCameraError(String(e)));
-    return () => stream?.getTracks().forEach((t) => t.stop());
+    if (REPLAY_PARAM && REPLAY_PARAM !== "none") {
+      void replaySource.play(REPLAY_PARAM, REPLAY_SPEED);
+    }
   }, []);
 
   return (
@@ -24,12 +16,13 @@ export default function App() {
         <span className="brand">FormCoach</span>
         <span className="tagline">Your agent coaches. Your camera stays in the tab.</span>
       </header>
-      <main style={{ padding: 24 }}>
-        {cameraError ? (
-          <p>Camera unavailable: {cameraError}</p>
-        ) : (
-          <video ref={videoRef} autoPlay playsInline muted style={{ maxWidth: "100%", borderRadius: 12 }} />
-        )}
+      <main className="layout">
+        <section className="stage-col">
+          <CameraView useCamera={USE_CAMERA} />
+        </section>
+        <aside className="side-col">
+          {/* SessionCard / PlanCard / AgentLog land in the UI task */}
+        </aside>
       </main>
     </div>
   );
