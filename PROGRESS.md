@@ -11,3 +11,5 @@
 - T4 완료 18:20 KST: UI 전체 조립(SessionCard/PlanCard/PlanForm/AgentLog/ProposalOverlay/DebugPanel/CameraView 큐·각도라벨·카운트다운) + styles.css 디자인 시스템. 브라우저 시각 검증: idle/countdown/set(밸거스 칩)/오버레이/요약/디버그패널 전부 확인. 폼 클릭 제출 → createdBy=user 확인.
 - T5 완료 18:30 KST: Playwright E2E 통과 — idle 툴 확인 → 폼 제출(createdBy=user) → startSet/단계 툴 전환 → 10렙 리플레이로 세트 완료 → applied/rejected/timeout → endSession 요약 + Agent log DOM 확인. 이슈 없음.
 - T6 완료 18:40 KST: README(Why WebMCP/툴 표/Try it/디버그 브리지/Roadmap), docs/DEVPOST.md(제출 텍스트+체크리스트), docs/screenshots 3장 자동 생성(scripts/screenshots.ts). 라이브 URL·영상 링크는 배포 후 사람이 README 상단에 기입.
+- 추가 18:50 KST: browser-api.spec.ts — mock document.modelContext로 실 API 경로 검증(등록 미러링, {content:[...]} 래핑, readOnlyHint 전달, AbortSignal 해제, Agent log 'agent' 표기). E2E 2개 통과.
+- 최종 상태: 단위 40 + E2E 2 전부 green, build/lint 클린. 남은 **사람 작업**: (1) GitHub 공개 레포 push + Vercel import → README 상단 라이브 URL 기입 (2) 실기기 검증 라운드(7.2) (3) 영상 촬영·업로드 (4) v1.0 태그 (5) Devpost 제출(docs/DEVPOST.md 붙여넣기, docs/screenshots 3장).
