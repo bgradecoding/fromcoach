@@ -6,3 +6,4 @@
 - 스킬 노트: 사용자가 요청한 "임펙커블" 디자인 스킬은 이 환경에 미설치 → PLAN §6 사양 + 자체 디자인 원칙으로 진행.
 - T0 완료 17:45 KST: 스캐폴드+빌드 green. docs/WEBMCP_API_NOTES.md 작성(웹 조사: document.modelContext 확정, AbortSignal 해제, {content:[...]} 반환, agentInvoked/toolparamdescription 실재). 이슈: vercel CLI 없음 → 사람이 레포+Vercel 연결.
 - T1 완료 17:55 KST: PoseSource 추상화, camera/replay 소스, fixtures 6종 생성기, 스켈레톤 오버레이. 브라우저에서 ?replay=squat_10reps_side 재생 확인. 이슈 없음.
+- T2 완료 18:00 KST: angles/view/repCounter/rules/gestures/ExerciseTracker + 단위테스트 21개 통과. 변경점: (1) knee_valgus를 부호 기반(무릎이 발목보다 중앙선 쪽 0.03+)으로 정의 — 정면 fixture에서 2D 각도가 유지되도록 굽힘 방향 반전 방식 채택. (2) arms_crossed는 손목 좌우 순서가 어깨 순서와 반전됐는지로 판정(거울/비거울 좌표 모두 안전).

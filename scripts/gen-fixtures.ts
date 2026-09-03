@@ -124,19 +124,22 @@ function squatFrontValgus() {
     const mid = 0.5;
     for (const s of [1, -1]) {
       const hip = { x: mid + s * 0.08, y: 0.45 };
-      const { knee, ankle } = legChain(hip, theta, s);
-      let kneeX = knee.x;
-      if (valgusReps.has(rep)) {
-        // Collapse the knee toward the midline: at full depth it sits
-        // 0.05 inside the ankle (|knee-mid| = 0.03 vs |ankle-mid| = 0.08).
-        const targetX = mid + s * 0.03;
-        kneeX = knee.x + (targetX - knee.x) * bend;
-      }
+      const phi = ((180 - theta) / 2) * deg;
+      const L = 0.25;
+      // Clean reps bend the knee outward; valgus reps sweep it across to the
+      // inside as depth increases. |x offset| stays L·sin(phi) at the bottom,
+      // so the 2D knee angle still reaches ~90° and the rep counts.
+      const dir = valgusReps.has(rep) ? 1 - 2 * bend : 1;
+      const knee = {
+        x: hip.x + s * L * Math.sin(phi) * dir,
+        y: hip.y + L * Math.cos(phi),
+      };
+      const ankle = { x: hip.x, y: knee.y + L * Math.cos(phi) };
       const hipIdx = s === 1 ? LM.LEFT_HIP : LM.RIGHT_HIP;
       const kneeIdx = s === 1 ? LM.LEFT_KNEE : LM.RIGHT_KNEE;
       const ankleIdx = s === 1 ? LM.LEFT_ANKLE : LM.RIGHT_ANKLE;
       set(lm, hipIdx, hip);
-      set(lm, kneeIdx, { x: kneeX, y: knee.y });
+      set(lm, kneeIdx, knee);
       set(lm, ankleIdx, ankle);
     }
     frames.push(lm);
