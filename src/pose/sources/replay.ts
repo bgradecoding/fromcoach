@@ -49,23 +49,33 @@ export class ReplayPoseSource implements PoseSource {
     this.playing = false;
   }
 
-  /** Plays one fixture to completion (or until cancel/stop). Resolves when done. */
+  /** Plays one fixture to completion (or until cancel/stop). Resolves when
+   *  done. Frames are paced by elapsed wall time with catch-up, so throttled
+   *  timers (hidden tabs) emit a burst instead of stretching the playback —
+   *  frame `t` stays fixture time either way. */
   play(name: string, speed = 1): Promise<void> {
     this.cancel();
     return new Promise((resolve, reject) => {
       loadFixture(name).then((fx) => {
         const stepMs = 1000 / fx.fps / speed;
+        const startedAt = performance.now();
         let i = 0;
         this.playing = true;
         const tick = () => {
           if (!this.playing || !this.onFrame) return resolve();
+          const due = Math.min(
+            fx.frames.length,
+            Math.floor((performance.now() - startedAt) / stepMs) + 1,
+          );
+          while (i < due) {
+            this.onFrame(fx.frames[i]);
+            i += 1;
+          }
           if (i >= fx.frames.length) {
             this.playing = false;
             this.timer = null;
             return resolve();
           }
-          this.onFrame(fx.frames[i]);
-          i += 1;
           this.timer = setTimeout(tick, stepMs);
         };
         tick();
